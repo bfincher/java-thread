@@ -62,7 +62,19 @@ public class EventDrivenThread <T> extends MyThread {
 	public static <T> EventDrivenThread<T> getEventDrivenThread(String id, DataHandlerIfc<T> messageHandler) {
 		BlockingQueue<T> queue = new LinkedBlockingQueue<T>();
 		return new EventDrivenThread<T>(id, queue, new Executor<T>(queue, messageHandler));
-	}	
+	}
+	
+	/** Get a new EventDrivenThread
+	 * @param <T>
+	 * @param id The ID of this EventDrivenThread
+	 * @param messageHandler The object that will handle messages
+	 * @return The newly created EventDrivenThread
+	 */
+	public static <T> EventDrivenThread<T> getEventDrivenThread(String id, 
+			DataHandlerIfc<T> messageHandler,
+			BlockingQueue<T> queue) {
+		return new EventDrivenThread<T>(id, queue, new Executor<T>(queue, messageHandler));
+	}
 	
 	private EventDrivenThread(String id, BlockingQueue<T> queue, Executor<T> executor) {
 		super(id, executor);		
