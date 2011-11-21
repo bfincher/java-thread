@@ -5,7 +5,7 @@ import org.junit.Test;
 import junit.framework.Assert;
 
 /** Tests My Threads */
-public class MyThreadTester {
+public class MyThreadTest {
 	
 	/** Method name is self explanatory
 	 * 

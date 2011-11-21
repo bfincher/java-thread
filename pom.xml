@@ -4,7 +4,7 @@
 	<groupId>com.fincher</groupId>
 	<artifactId>thread</artifactId>
 	<packaging>jar</packaging>
-	<version>1.0</version>
+	<version>1.0.1</version>
 	<name>Thread Utilities</name>
 	<url>http://maven.apache.org</url>
 	<dependencies>
@@ -13,11 +13,11 @@
 			<artifactId>log4j</artifactId>
 			<version>RELEASE</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>RELEASE</version>
+			<version>4.10</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
@@ -32,7 +32,21 @@
 					<source>1.6</source>
 					<target>1.6</target>
 				</configuration>
-			</plugin>
+			</plugin>					
 		</plugins>
+		
 	</build>
+
+	<distributionManagement>
+		<repository>
+			<id>central</id>
+			<name>central</name>
+			<url>http://www.fincherhome.com:8081/nexus/content/repositories/releases</url>
+		</repository>
+		<snapshotRepository>
+			<id>snapshots</id>
+			<name>snapshots</name>
+			<url>http://www.fincherhome.com:8081/nexus/content/repositories/snapshots</url>
+		</snapshotRepository>
+	</distributionManagement>
 </project>

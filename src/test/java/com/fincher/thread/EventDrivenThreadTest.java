@@ -8,7 +8,7 @@ import junit.framework.Assert;
 import org.junit.Test;
 
 /** Test the EventDrivenThread */
-public class EventDrivenThreadTester implements DataHandlerIfc<String> {
+public class EventDrivenThreadTest implements DataHandlerIfc<String> {
 	
 	private List<String> queue = new ArrayList<String>();
 	

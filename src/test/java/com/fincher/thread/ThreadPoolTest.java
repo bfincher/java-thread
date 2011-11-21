@@ -11,7 +11,7 @@ import junit.framework.Assert;
 
 
 /** A JUnit tester for the thread pool */
-public class ThreadPoolTester {
+public class ThreadPoolTest {
 	
 	private static class TestRunnable implements RunnableWithIdIfc {
 		

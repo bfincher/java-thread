@@ -11,7 +11,7 @@ import java.util.concurrent.ScheduledFuture;
 import org.junit.Test;
 
 /** Test the EventList */
-public class EventListTester {
+public class EventListTest {
 	
 //	@Override
 //	public void setUp() {
