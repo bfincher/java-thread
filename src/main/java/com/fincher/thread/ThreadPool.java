@@ -203,5 +203,9 @@ public class ThreadPool {
     	
     	runnableQueue.clear();
     	threadList.clear();
-    }        
+    }  
+	
+	public LinkedBlockingQueue<FutureTaskWithId<?>> getQueue() {
+		return runnableQueue;
+	}
 }
