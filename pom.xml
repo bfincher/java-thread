@@ -5,12 +5,12 @@
 	<parent>
 		<groupId>com.fincher</groupId>
 		<artifactId>com.fincher</artifactId>
-		<version>1.0.0</version>
+		<version>1.0.1</version>
 	</parent>
 	
 	<artifactId>thread</artifactId>
 	<packaging>jar</packaging>
-	<version>1.0.2</version>
+	<version>1.0.3</version>
 	<name>Thread Utilities</name>
 	<url>http://maven.apache.org</url>
 	<dependencies>
