@@ -48,8 +48,8 @@ public class EventDrivenThread <T> extends MyThread {
 		}
 		
 		@Override
-        public void terminate() {        
-        }
+        	public void terminate() {        
+        	}
 	}
 	
 	
