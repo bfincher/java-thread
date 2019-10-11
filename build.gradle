@@ -39,6 +39,6 @@ publishing {
 
 checkstyle {
     configFile file("config/checkstyle/checkstyle.xml")
-    toolVersion "8.24"
+//    toolVersion "8.24"
 }
 

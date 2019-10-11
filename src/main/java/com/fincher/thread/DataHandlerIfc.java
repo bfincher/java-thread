@@ -8,7 +8,7 @@ package com.fincher.thread;
  */
 
 public interface DataHandlerIfc<T> {
-		
+
     /** A message has arrived that should be processed.
      * 
      * @param data The message to be processed
