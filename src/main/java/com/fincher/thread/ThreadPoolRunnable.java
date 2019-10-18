@@ -2,11 +2,12 @@ package com.fincher.thread;
 
 import java.util.concurrent.BlockingQueue;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class ThreadPoolRunnable implements MyRunnableIfc {
 
-    private static Logger logger = Logger.getLogger(ThreadPoolRunnable.class);
+    private static Logger LOG = LoggerFactory.getLogger(ThreadPoolRunnable.class);
 
     private final BlockingQueue<FutureTaskWithId<?>> queue;
 
@@ -22,12 +23,12 @@ class ThreadPoolRunnable implements MyRunnableIfc {
         try {
             future = queue.take();
         } catch (InterruptedException ie) {
-            logger.info("If this occurs at shutdown, ignore", ie);
+            LOG.info("If this occurs at shutdown, ignore", ie);
             return;
         }
 
-        if (logger.isTraceEnabled()) {
-            logger.trace("Begin execution of task: " + future.getId());
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Begin execution of task: {}", future.getId());
         }
 
         try {
@@ -36,7 +37,7 @@ class ThreadPoolRunnable implements MyRunnableIfc {
             // call get to determine if an exception occurred in the call
             future.get();
         } catch (Throwable t) {
-            logger.error(t.getMessage(), t);
+            LOG.error(t.getMessage(), t);
 
             // since runnable.run can't throw an Exception, wrap the exception in an Error
             // and throw
@@ -47,8 +48,8 @@ class ThreadPoolRunnable implements MyRunnableIfc {
                 origThreadName = null;
             }
 
-            if (logger.isTraceEnabled()) {
-                logger.trace("Completed execution of task: " + future.getId());
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Completed execution of task: {}", future.getId());
             }
         }
     }

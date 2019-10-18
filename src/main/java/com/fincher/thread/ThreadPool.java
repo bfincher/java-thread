@@ -5,7 +5,8 @@ import java.util.List;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Multiple threads that are used to perform various tasks
@@ -15,7 +16,7 @@ import org.apache.log4j.Logger;
  */
 public class ThreadPool {
 
-    private static Logger logger = Logger.getLogger(ThreadPool.class);
+    private static Logger LOG = LoggerFactory.getLogger(ThreadPool.class);
 
     private static ThreadPool DEFAULT_THREAD_POOL = null;
 
@@ -88,8 +89,7 @@ public class ThreadPool {
         boolean finished = false;
         do {
             if (runnableQueue.size() > queueSizeWarningThreshold) {
-                logger.warn(threadPoolName + " Warning.  Thread pool queue size = "
-                        + runnableQueue.size());
+                LOG.warn("{} Warning.  Thread pool queue size = {}", threadPoolName, runnableQueue.size());
             }
 
             runnableQueue.put(future);

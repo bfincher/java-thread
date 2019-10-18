@@ -4,7 +4,8 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Wraps an event to be executed in the future.
@@ -14,7 +15,7 @@ import org.apache.log4j.Logger;
  */
 class EventWrapper implements MyRunnableScheduledFuture<Boolean>, RunnableWithIdIfc {
 
-    private static Logger logger = Logger.getLogger(EventWrapper.class);
+    private static Logger LOG = LoggerFactory.getLogger(EventWrapper.class);
 
     /** The body of this event. */
     private final RunnableWithIdIfc task;
@@ -76,7 +77,7 @@ class EventWrapper implements MyRunnableScheduledFuture<Boolean>, RunnableWithId
             task.run();
             currentThread = null;
         } catch (Throwable t) {
-            logger.error(t.getMessage(), t);
+            LOG.error(t.getMessage(), t);
         }
 
         postExecute();
@@ -119,9 +120,8 @@ class EventWrapper implements MyRunnableScheduledFuture<Boolean>, RunnableWithId
             setState(StateEnum.CANCELLED);
         }
 
-        if (logger.isTraceEnabled()) {
-            logger.trace(getId() + " cancel:  mayInterruptIfRunning = " + mayInterruptIfRunning
-                    + ".  Result = " + result);
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("{} cancel:  mayInterruptIfRunning = {}.  Result = {}", getId(), mayInterruptIfRunning, result);
         }
 
         return result;

@@ -1,6 +1,7 @@
 package com.fincher.thread;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A simple extension of the Java Thread that attempts to catch Exceptions
@@ -10,7 +11,7 @@ import org.apache.log4j.Logger;
  */
 public final class TraditionalThread extends Thread {
 
-    private static Logger logger = Logger.getLogger(TraditionalThread.class);
+    private static Logger LOG = LoggerFactory.getLogger(TraditionalThread.class);
 
     private final Runnable target;
 
@@ -52,7 +53,7 @@ public final class TraditionalThread extends Thread {
         try {
             target.run();
         } catch (Throwable t) {
-            logger.error(t.getMessage(), t);
+            LOG.error(t.getMessage(), t);
         }
     }
 

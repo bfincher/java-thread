@@ -1,6 +1,7 @@
 package com.fincher.thread;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <pre>
@@ -42,7 +43,7 @@ import org.apache.log4j.Logger;
  */
 public class MyThread extends Thread implements Runnable, MyThreadIfc {
 
-    private static final Logger logger = Logger.getLogger(MyThread.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MyThread.class);
 
     /** Should this thread terminate? */
     private volatile boolean terminate = false;
@@ -111,13 +112,13 @@ public class MyThread extends Thread implements Runnable, MyThreadIfc {
                 }
             } catch (Throwable t) {
                 if (exceptionHandler == null) {
-                    logger.error(getName() + " " + t.getMessage(), t);
+                    LOG.error(getName() + " " + t.getMessage(), t);
                 } else {
                     exceptionHandler.onException(t);
                 }
 
                 if (!continueAfterException) {
-                    logger.error(getName() + " Execution terminating due to exception");
+                    LOG.error("{} Execution terminating due to exception", getName());
                     terminate = true;
                 }
             }
@@ -129,7 +130,7 @@ public class MyThread extends Thread implements Runnable, MyThreadIfc {
             }
         } while (!terminate && continueExecution);
 
-        logger.debug(getName() + " terminated");
+        LOG.debug("{} terminated", getName());
     }
 
     /** Terminates this thread */

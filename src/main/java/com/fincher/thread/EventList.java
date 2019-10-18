@@ -7,7 +7,8 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Used to schedule events to execute after a delay.
@@ -17,7 +18,7 @@ import org.apache.log4j.Logger;
  */
 public class EventList {
 
-    private static Logger logger = Logger.getLogger(EventList.class);
+    private static Logger LOG = LoggerFactory.getLogger(EventList.class);
 
     private class EventListRunnable implements MyCallableIfc<Boolean> {
         /**
@@ -31,7 +32,7 @@ public class EventList {
                     try {
                         eventList.wait();
                     } catch (InterruptedException ie) {
-                        logger.info(ie.getMessage(), ie);
+                        LOG.info(ie.getMessage(), ie);
                         Thread.currentThread().interrupt();
                     }
                 }
@@ -45,9 +46,8 @@ public class EventList {
                 if (delayMillis <= 0) {
                     eventList.remove();
 
-                    if (logger.isTraceEnabled()) {
-                        logger.trace("EventList:  Submitting event " + event.getTask().getId()
-                                + " for execution");
+                    if (LOG.isTraceEnabled()) {
+                        LOG.trace("EventList:  Submitting event {} for execution", event.getTask().getId());
                     }
 
                     threadPool.submit(event);
@@ -186,8 +186,8 @@ public class EventList {
      */
     protected final void addToEventList(EventWrapper wrapper) {
         synchronized (eventList) {
-            if (logger.isTraceEnabled()) {
-                logger.trace("EventList:  Scheduling event: " + wrapper.getTask().getId());
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("EventList:  Scheduling event: {}", wrapper.getTask().getId());
             }
 
             eventList.add(wrapper);
