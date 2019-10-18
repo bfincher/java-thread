@@ -1,11 +1,12 @@
 package com.fincher.thread;
 
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutionException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class ThreadPoolRunnable implements MyRunnableIfc {
+class ThreadPoolRunnable implements MyCallableIfc<Boolean> {
 
     private static Logger LOG = LoggerFactory.getLogger(ThreadPoolRunnable.class);
 
@@ -18,14 +19,8 @@ class ThreadPoolRunnable implements MyRunnableIfc {
     }
 
     @Override
-    public void run() {
-        FutureTaskWithId<?> future;
-        try {
-            future = queue.take();
-        } catch (InterruptedException ie) {
-            LOG.info("If this occurs at shutdown, ignore", ie);
-            return;
-        }
+    public Boolean call() throws InterruptedException, ExecutionException {
+        FutureTaskWithId<?> future = queue.take();
 
         if (LOG.isTraceEnabled()) {
             LOG.trace("Begin execution of task: {}", future.getId());
@@ -36,12 +31,7 @@ class ThreadPoolRunnable implements MyRunnableIfc {
 
             // call get to determine if an exception occurred in the call
             future.get();
-        } catch (Throwable t) {
-            LOG.error(t.getMessage(), t);
-
-            // since runnable.run can't throw an Exception, wrap the exception in an Error
-            // and throw
-            throw new Error(t);
+            return true;
         } finally {
             if (origThreadName != null) {
                 Thread.currentThread().setName(origThreadName);
