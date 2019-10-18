@@ -49,6 +49,8 @@ public class MyThread extends Thread implements Runnable, MyThreadIfc {
 
     /** The user's object that will be invoked upon each thread iteration */
     private final MyRunnableIfc runnable;
+    
+    private final MyCallableIfc<Boolean> callable;
 
     /** Used to notify the user of any exceptions in the thread's body */
     private ExceptionHandlerIfc exceptionHandler = null;
@@ -67,18 +69,19 @@ public class MyThread extends Thread implements Runnable, MyThreadIfc {
     public MyThread(String name, MyRunnableIfc runnable) {
         super(name);
         this.runnable = runnable;
+        callable = null;
     }
-
+    
     /**
      * Constructs a new MyThread
      * 
-     * @param threadGroup The Java Thread Group for this thread
-     * @param name        The name of this thread
-     * @param runnable    To be invoked upon each thread iteration
+     * @param name     The name of this thread
+     * @param runnable To be invoked upon each thread iteration
      */
-    public MyThread(ThreadGroup threadGroup, String name, MyRunnableIfc runnable) {
-        super(threadGroup, name);
-        this.runnable = runnable;
+    public MyThread(String name, MyCallableIfc<Boolean> callable) {
+        super(name);
+        this.callable = callable;
+        runnable = null;
     }
 
     /**
@@ -98,9 +101,14 @@ public class MyThread extends Thread implements Runnable, MyThreadIfc {
     /** Should not be called directly */
     @Override
     public void run() {
+        boolean continueExecution;
         do {
             try {
-                runnable.run();
+                if (runnable != null) {
+                    runnable.run();
+                } else {
+                    callable.call();
+                }
             } catch (Throwable t) {
                 if (exceptionHandler == null) {
                     logger.error(getName() + " " + t.getMessage(), t);
@@ -113,7 +121,13 @@ public class MyThread extends Thread implements Runnable, MyThreadIfc {
                     terminate = true;
                 }
             }
-        } while (!terminate && runnable.continueExecution());
+            
+            if (runnable != null) {
+                continueExecution = runnable.continueExecution();
+            } else {
+                continueExecution = callable.continueExecution();
+            }
+        } while (!terminate && continueExecution);
 
         logger.debug(getName() + " terminated");
     }
@@ -122,7 +136,12 @@ public class MyThread extends Thread implements Runnable, MyThreadIfc {
     public void terminate() {
         terminate = true;
         interrupt();
-        runnable.terminate();
+        
+        if (runnable != null) {
+            runnable.terminate();
+        } else {
+            callable.terminate();
+        }
     }
 
     /** Has this thread been terminated */

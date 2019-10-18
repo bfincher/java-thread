@@ -56,9 +56,7 @@ public class MyThreadTest {
     @Test
     public void testThreadWithExceptionStopExecution() throws InterruptedException {
 
-        ThreadGroup myThreadGroup = new ThreadGroup("MyThreadGroup");
-
-        MyThreadIfc thread = new MyThread(myThreadGroup, "TestThread", new MyRunnableIfc() {
+        MyThreadIfc thread = new MyThread("TestThread", new MyRunnableIfc() {
 
             @Override
             public void run() {

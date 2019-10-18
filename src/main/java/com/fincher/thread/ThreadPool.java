@@ -46,6 +46,7 @@ public class ThreadPool {
         return DEFAULT_THREAD_POOL;
     }
 
+
     /**
      * Constructs a new ThreadPool.
      * 
@@ -53,17 +54,6 @@ public class ThreadPool {
      * @param threadPoolName The name of this thread pool
      */
     public ThreadPool(int numThreads, String threadPoolName) {
-        this(numThreads, threadPoolName, null);
-    }
-
-    /**
-     * Constructs a new ThreadPool.
-     * 
-     * @param numThreads     The maximum number of threads in the thread pool
-     * @param threadPoolName The name of this thread pool
-     * @param threadGroup    The group assigned to created threads
-     */
-    public ThreadPool(int numThreads, String threadPoolName, ThreadGroup threadGroup) {
         threadList = new ArrayList<MyThread>(numThreads);
 
         this.threadPoolName = threadPoolName;
@@ -74,12 +64,7 @@ public class ThreadPool {
         for (int i = 0; i < numThreads; i++) {
             String id = "ThreadPool_" + this.threadPoolName + "_" + i;
 
-            MyThread thread;
-            if (threadGroup != null) {
-                thread = new MyThread(threadGroup, id, new ThreadPoolRunnable(runnableQueue));
-            } else {
-                thread = new MyThread(id, new ThreadPoolRunnable(runnableQueue));
-            }
+            MyThread thread = new MyThread(id, new ThreadPoolRunnable(runnableQueue));
 
             thread.start();
             threadList.add(thread);
@@ -99,20 +84,16 @@ public class ThreadPool {
         }
     }
 
-    private void submit(FutureTaskWithId<?> future) {
+    private void submit(FutureTaskWithId<?> future) throws InterruptedException {
         boolean finished = false;
         do {
-            try {
-                if (runnableQueue.size() > queueSizeWarningThreshold) {
-                    logger.warn(threadPoolName + " Warning.  Thread pool queue size = "
-                            + runnableQueue.size());
-                }
-
-                runnableQueue.put(future);
-                finished = true;
-            } catch (InterruptedException ie) {
-                logger.info(ie.getMessage(), ie);
+            if (runnableQueue.size() > queueSizeWarningThreshold) {
+                logger.warn(threadPoolName + " Warning.  Thread pool queue size = "
+                        + runnableQueue.size());
             }
+
+            runnableQueue.put(future);
+            finished = true;
         } while (!finished);
     }
 
@@ -122,7 +103,7 @@ public class ThreadPool {
      * @param task The task to be executed
      * @return a Future representing pending completion of the task
      */
-    public Future<Boolean> submit(RunnableWithIdIfc task) {
+    public Future<Boolean> submit(RunnableWithIdIfc task) throws InterruptedException {
         if (isShutdown) {
             throw new IllegalStateException("shutdown");
         }
@@ -139,7 +120,7 @@ public class ThreadPool {
      * @param <T> The type of data
      * @return a Future representing pending completion of the task
      */
-    public <T> Future<T> submit(CallableWithIdIfc<T> task) {
+    public <T> Future<T> submit(CallableWithIdIfc<T> task) throws InterruptedException {
         if (isShutdown) {
             throw new IllegalStateException("shutdown");
         }

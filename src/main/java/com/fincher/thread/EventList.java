@@ -15,9 +15,70 @@ import org.apache.log4j.Logger;
  * @author Brian Fincher
  *
  */
-public class EventList implements MyRunnableIfc {
+public class EventList {
 
     private static Logger logger = Logger.getLogger(EventList.class);
+
+    private class EventListRunnable implements MyCallableIfc<Boolean> {
+        /**
+         * Performs maintenance on the EventMap. Events that should be executed now are removed from
+         * the map and executed. Otherwise, this thread sleeps until the next execution time
+         */
+        @Override
+        public Boolean call() throws InterruptedException {
+            synchronized (eventList) {
+                while (eventList.isEmpty() && !terminated) {
+                    try {
+                        eventList.wait();
+                    } catch (InterruptedException ie) {
+                        logger.info(ie.getMessage(), ie);
+                        Thread.currentThread().interrupt();
+                    }
+                }
+
+                if (terminated) {
+                    return false;
+                }
+
+                EventWrapper event = eventList.peek();
+                long delayMillis = event.getDelay(TimeUnit.MILLISECONDS);
+                if (delayMillis <= 0) {
+                    eventList.remove();
+
+                    if (logger.isTraceEnabled()) {
+                        logger.trace("EventList:  Submitting event " + event.getTask().getId()
+                                + " for execution");
+                    }
+
+                    threadPool.submit(event);
+                } else {
+                    synchronized (eventList) {
+                        eventList.wait(delayMillis);
+                    }
+                }
+            }
+            return true;
+        }
+
+        /**
+         * Should this thread continue to execute
+         * 
+         * @return true if this thread should continue to execute
+         */
+        @Override
+        public boolean continueExecution() {
+            return !terminated;
+        }
+
+        /**
+         * Terminates this EventList. This method should not be called directly. It will be called
+         * by the parent thread
+         */
+        @Override
+        public void terminate() {
+            terminated = true;
+        }
+    }
 
     /** A list used to hold events to be executed in the future */
     private BlockingQueue<EventWrapper> eventList = new PriorityBlockingQueue<EventWrapper>();
@@ -30,13 +91,15 @@ public class EventList implements MyRunnableIfc {
 
     private final ThreadPool threadPool;
 
+    private final EventListRunnable runnable = new EventListRunnable();
+
     private static List<EventList> instances = Collections
             .synchronizedList(new ArrayList<EventList>());
 
     /** Creates a new EventList instance */
     protected EventList(ThreadPool threadPool) {
         this.threadPool = threadPool;
-        thread = new MyThread("EventList", this);
+        thread = new MyThread("EventList", runnable);
         thread.start();
         instances.add(this);
     }
@@ -46,16 +109,6 @@ public class EventList implements MyRunnableIfc {
         terminated = true;
         thread.terminate();
         thread = null;
-        instances.remove(this);
-    }
-
-    /**
-     * Terminates this EventList. This method should not be called directly. It will be called by
-     * the parent thread
-     */
-    @Override
-    public void terminate() {
-        terminated = true;
         eventList.clear();
         instances.remove(this);
     }
@@ -138,60 +191,7 @@ public class EventList implements MyRunnableIfc {
             }
 
             eventList.add(wrapper);
-            eventList.notify();
+            eventList.notifyAll();
         }
     }
-
-    /**
-     * Performs maintenance on the EventMap. Events that should be executed now are removed from the
-     * map and executed. Otherwise, this thread sleeps until the next execution time
-     */
-    @Override
-    public void run() {
-        synchronized (eventList) {
-            while (eventList.isEmpty() && !terminated) {
-                try {
-                    eventList.wait();
-                } catch (InterruptedException ie) {
-                    logger.info(ie.getMessage(), ie);
-                }
-            }
-
-            if (terminated) {
-                return;
-            }
-
-            EventWrapper event = eventList.peek();
-            long delayMillis = event.getDelay(TimeUnit.MILLISECONDS);
-            if (delayMillis <= 0) {
-                eventList.remove();
-
-                if (logger.isTraceEnabled()) {
-                    logger.trace("EventList:  Submitting event " + event.getTask().getId()
-                            + " for execution");
-                }
-
-                threadPool.submit(event);
-            } else {
-                try {
-                    synchronized (eventList) {
-                        eventList.wait(delayMillis);
-                    }
-                } catch (InterruptedException ie) {
-                    logger.info(ie.getMessage(), ie);
-                }
-            }
-        }
-    }
-
-    /**
-     * Should this thread continue to execute
-     * 
-     * @return true if this thread should continue to execute
-     */
-    @Override
-    public boolean continueExecution() {
-        return !terminated;
-    }
-
 }
