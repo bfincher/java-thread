@@ -19,6 +19,8 @@ import org.slf4j.LoggerFactory;
 public class EventList {
 
     private static Logger LOG = LoggerFactory.getLogger(EventList.class);
+    
+    private static final String IS_TERMINATED_MSG = "terminated";
 
     private class EventListRunnable implements MyCallableIfc<Boolean> {
         /**
@@ -43,19 +45,19 @@ public class EventList {
 
                 EventWrapper event = eventList.peek();
                 long delayMillis = event.getDelay(TimeUnit.MILLISECONDS);
-                if (delayMillis <= 0) {
-                    eventList.remove();
-
-                    if (LOG.isTraceEnabled()) {
-                        LOG.trace("EventList:  Submitting event {} for execution", event.getTask().getId());
-                    }
-
-                    threadPool.submit(event);
-                } else {
-                    synchronized (eventList) {
-                        eventList.wait(delayMillis);
-                    }
+                while (delayMillis > 0) {
+                    eventList.wait(delayMillis);
+                    delayMillis = event.getDelay(TimeUnit.MILLISECONDS);
                 }
+
+                eventList.remove();
+
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace("EventList:  Submitting event {} for execution",
+                            event.getTask().getId());
+                }
+
+                threadPool.submit(event);
             }
             return true;
         }
@@ -123,7 +125,7 @@ public class EventList {
     public MyRunnableScheduledFuture<Boolean> schedule(RunnableWithIdIfc command, long delay) {
 
         if (terminated) {
-            throw new IllegalStateException("terminated");
+            throw new IllegalStateException(IS_TERMINATED_MSG);
         }
 
         EventWrapper event = new EventWrapper(command, System.currentTimeMillis() + delay);
@@ -145,7 +147,7 @@ public class EventList {
             long initialDelay, long period) {
 
         if (terminated) {
-            throw new IllegalStateException("terminated");
+            throw new IllegalStateException(IS_TERMINATED_MSG);
         }
 
         EventWrapper event = new FixedDelayEventWrapper(command,
@@ -169,7 +171,7 @@ public class EventList {
             long initialDelay, long period) {
 
         if (terminated) {
-            throw new IllegalStateException("terminated");
+            throw new IllegalStateException(IS_TERMINATED_MSG);
         }
 
         EventWrapper event = new FixedRateEventWrapper(command,

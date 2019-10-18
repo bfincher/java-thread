@@ -92,29 +92,21 @@ class EventWrapper implements MyRunnableScheduledFuture<Boolean>, RunnableWithId
     @Override
     public boolean cancel(boolean mayInterruptIfRunning) {
 
-        boolean result = true;
+        boolean result;
 
         synchronized (stateEnumSynchronizer) {
-            switch (state) {
-                case CANCELLED:
-                case COMPLETED:
-                case PENDING:
+            if (state == StateEnum.RUNNING) {
+                if (mayInterruptIfRunning && currentThread != null) {
+                    currentThread.interrupt();
                     result = true;
-                    break;
-
-                case RUNNING:
-                    if (mayInterruptIfRunning) {
-                        if (currentThread != null) {
-                            currentThread.interrupt();
-                            result = true;
-                        } else {
-                            result = false;
-                        }
-                    } else {
-                        result = false;
-                    }
+                } else {
+                    result = false;
+                }
+            } else {
+                result = true;
             }
         }
+            
 
         if (result) {
             setState(StateEnum.CANCELLED);
@@ -146,48 +138,39 @@ class EventWrapper implements MyRunnableScheduledFuture<Boolean>, RunnableWithId
 
     @Override
     public Boolean get() throws InterruptedException, CancellationException {
-        if (isCancelled()) {
-            throw new CancellationException();
-        }
+        
 
         synchronized (stateEnumSynchronizer) {
-            if (isDone()) {
-                return Boolean.TRUE;
-            } else {
+            while (!isDone()) {
                 stateEnumSynchronizer.wait();
-                if (isCancelled()) {
-                    throw new CancellationException();
-                }
-
-                return Boolean.TRUE;
             }
+            
+            if (isCancelled()) {
+                throw new CancellationException();
+            }
+            
+            return Boolean.TRUE;
         }
     }
 
     @Override
     public Boolean get(long timeout, TimeUnit unit)
             throws InterruptedException, CancellationException {
-        if (isCancelled()) {
-            throw new CancellationException();
-        }
-
+        
+        long waitUntil = System.currentTimeMillis() + TimeUnit.MILLISECONDS.convert(timeout, unit);
         synchronized (stateEnumSynchronizer) {
-            if (isDone()) {
-                return Boolean.TRUE;
-            } else {
-                stateEnumSynchronizer.wait(unit.toMillis(timeout));
-
-                if (isCancelled()) {
-                    throw new CancellationException();
-                }
-
-                if (isDone()) {
-                    return Boolean.TRUE;
-                } else {
-                    return false;
-                }
+            long timeToWait = waitUntil - System.currentTimeMillis();
+            while (!isDone() && timeToWait > 0) {
+                stateEnumSynchronizer.wait(timeToWait);
+                timeToWait = waitUntil - System.currentTimeMillis();
             }
-        }
+            
+            if (isCancelled()) {
+                throw new CancellationException();
+            }
+            
+            return Boolean.TRUE;
+        } 
     }
 
     @Override

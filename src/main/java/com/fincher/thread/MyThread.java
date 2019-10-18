@@ -111,16 +111,7 @@ public class MyThread extends Thread implements Runnable, MyThreadIfc {
                     callable.call();
                 }
             } catch (Throwable t) {
-                if (exceptionHandler == null) {
-                    LOG.error(getName() + " " + t.getMessage(), t);
-                } else {
-                    exceptionHandler.onException(t);
-                }
-
-                if (!continueAfterException) {
-                    LOG.error("{} Execution terminating due to exception", getName());
-                    terminate = true;
-                }
+                handleException(t);
             }
             
             if (runnable != null) {
@@ -153,6 +144,19 @@ public class MyThread extends Thread implements Runnable, MyThreadIfc {
     /** Gets the runnable object associated with this thread */
     public MyRunnableIfc getRunnable() {
         return runnable;
+    }
+    
+    private void handleException(Throwable t) {
+        if (exceptionHandler == null) {
+            LOG.error(getName() + " " + t.getMessage(), t);
+        } else {
+            exceptionHandler.onException(t);
+        }
+
+        if (!continueAfterException) {
+            LOG.error("{} Execution terminating due to exception", getName());
+            terminate = true;
+        }
     }
 
 }

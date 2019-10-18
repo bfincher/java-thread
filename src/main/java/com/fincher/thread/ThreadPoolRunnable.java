@@ -51,7 +51,7 @@ class ThreadPoolRunnable implements MyCallableIfc<Boolean> {
 
     @Override
     public void terminate() {
-
+        // no action necessary
     }
 
 }

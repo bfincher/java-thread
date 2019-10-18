@@ -1,5 +1,9 @@
 package com.fincher.thread;
 
+import static org.junit.Assert.assertEquals;
+
+import java.util.concurrent.LinkedBlockingQueue;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -104,7 +108,10 @@ public class MyThreadTest {
      * 
      */
     @Test
-    public void testThread() {
+    public void testThread() throws InterruptedException {
+        
+        LinkedBlockingQueue<Integer> queue = new LinkedBlockingQueue<>();
+        
         MyThreadIfc thread = new MyThread("TestThread", new MyRunnableIfc() {
 
             private int count = 0;
@@ -113,7 +120,7 @@ public class MyThreadTest {
             public void run() {
                 try {
                     System.out.println("Thread running");
-                    count++;
+                    queue.add(count++);
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -123,7 +130,7 @@ public class MyThreadTest {
 
             @Override
             public boolean continueExecution() {
-                return count <= 10;
+                return count < 10;
             }
 
             @Override
@@ -132,12 +139,8 @@ public class MyThreadTest {
         });
 
         thread.start();
-
-        try {
-            thread.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        thread.join();
+        assertEquals(10, queue.size());
         System.out.println("Thread terminated");
 
         thread.terminate();

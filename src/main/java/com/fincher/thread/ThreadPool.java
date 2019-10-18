@@ -18,12 +18,11 @@ public class ThreadPool {
 
     private static Logger LOG = LoggerFactory.getLogger(ThreadPool.class);
 
-    private static ThreadPool DEFAULT_THREAD_POOL = null;
+    private static final String IS_SHUTDOWN_MSG = "shutdown";
 
     private final List<MyThread> threadList;
 
-    private final LinkedBlockingQueue<FutureTaskWithId<?>> runnableQueue = 
-            new LinkedBlockingQueue<FutureTaskWithId<?>>();
+    private final LinkedBlockingQueue<FutureTaskWithId<?>> runnableQueue = new LinkedBlockingQueue<FutureTaskWithId<?>>();
 
     private boolean isShutdown = false;
 
@@ -32,21 +31,6 @@ public class ThreadPool {
     private final String threadPoolName;
 
     private final int queueSizeWarningThreshold;
-
-    /**
-     * Gets the default thread pool for a JVM.
-     * 
-     * @return the default thread pool for a JVM
-     */
-    public static synchronized ThreadPool getDefaultThreadPool() {
-        if (DEFAULT_THREAD_POOL == null) {
-            DEFAULT_THREAD_POOL = new ThreadPool(
-                    new Integer(System.getProperty("thread.pool.default.num.threads", "10")),
-                    "Default");
-        }
-        return DEFAULT_THREAD_POOL;
-    }
-
 
     /**
      * Constructs a new ThreadPool.
@@ -86,15 +70,12 @@ public class ThreadPool {
     }
 
     private void submit(FutureTaskWithId<?> future) throws InterruptedException {
-        boolean finished = false;
-        do {
-            if (runnableQueue.size() > queueSizeWarningThreshold) {
-                LOG.warn("{} Warning.  Thread pool queue size = {}", threadPoolName, runnableQueue.size());
-            }
+        if (runnableQueue.size() > queueSizeWarningThreshold) {
+            LOG.warn("{} Warning.  Thread pool queue size = {}", threadPoolName,
+                    runnableQueue.size());
+        }
 
-            runnableQueue.put(future);
-            finished = true;
-        } while (!finished);
+        runnableQueue.put(future);
     }
 
     /**
@@ -105,7 +86,7 @@ public class ThreadPool {
      */
     public Future<Boolean> submit(RunnableWithIdIfc task) throws InterruptedException {
         if (isShutdown) {
-            throw new IllegalStateException("shutdown");
+            throw new IllegalStateException(IS_SHUTDOWN_MSG);
         }
 
         FutureTaskWithId<Boolean> future = new FutureTaskWithId<Boolean>(task, true);
@@ -117,12 +98,12 @@ public class ThreadPool {
      * Submit a task to be executed on the thread pool.
      * 
      * @param task The task to be executed
-     * @param <T> The type of data
+     * @param      <T> The type of data
      * @return a Future representing pending completion of the task
      */
     public <T> Future<T> submit(CallableWithIdIfc<T> task) throws InterruptedException {
         if (isShutdown) {
-            throw new IllegalStateException("shutdown");
+            throw new IllegalStateException(IS_SHUTDOWN_MSG);
         }
 
         FutureTaskWithId<T> future = new FutureTaskWithId<T>(task);
@@ -140,7 +121,7 @@ public class ThreadPool {
     public MyRunnableScheduledFuture<Boolean> schedule(RunnableWithIdIfc command, long delay) {
 
         if (isShutdown) {
-            throw new IllegalStateException("shutdown");
+            throw new IllegalStateException(IS_SHUTDOWN_MSG);
         }
 
         return eventList.schedule(command, delay);
@@ -160,7 +141,7 @@ public class ThreadPool {
             long initialDelay, long period) {
 
         if (isShutdown) {
-            throw new IllegalStateException("shutdown");
+            throw new IllegalStateException(IS_SHUTDOWN_MSG);
         }
 
         return eventList.scheduleWithFixedDelay(command, initialDelay, period);
@@ -181,7 +162,7 @@ public class ThreadPool {
             long initialDelay, long period) {
 
         if (isShutdown) {
-            throw new IllegalStateException("shutdown");
+            throw new IllegalStateException(IS_SHUTDOWN_MSG);
         }
 
         return eventList.scheduleAtFixedRate(command, initialDelay, period);
@@ -189,10 +170,6 @@ public class ThreadPool {
 
     /** Shutdown this ThreadPool. */
     public final void shutdown() {
-        if (DEFAULT_THREAD_POOL != null && this == DEFAULT_THREAD_POOL) {
-            DEFAULT_THREAD_POOL = null;
-        }
-
         isShutdown = true;
 
         eventList.shutdown();

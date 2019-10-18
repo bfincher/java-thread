@@ -9,6 +9,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledFuture;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 /** Test the EventList */
@@ -81,6 +83,19 @@ public class EventListTest {
             }
         }
     }
+    
+    private ThreadPool threadPool;
+    
+    @Before
+    public void setUp() {
+        threadPool = new ThreadPool(10, "defaultThreadPool");
+    }
+    
+    @After
+    public void tearDown() {
+        threadPool.shutdown();
+        threadPool = null;
+    }
 
     /**
      * Method name is self explanatory
@@ -90,7 +105,6 @@ public class EventListTest {
     @Test
     public void testTimer() throws InterruptedException {
         System.out.println("testTimer");
-        ThreadPool threadPool = ThreadPool.getDefaultThreadPool();
         final long startTime = System.currentTimeMillis();
         System.out.println("Scheduling...");
 
@@ -126,7 +140,6 @@ public class EventListTest {
     @Test
     public void testCancelTimer() throws InterruptedException {
         System.out.println("testCancelTimer");
-        ThreadPool threadPool = ThreadPool.getDefaultThreadPool();
 
         BlockingQueue<String> queue = new LinkedBlockingQueue<String>();
         ScheduledFuture<?> future = threadPool.schedule(new TestRunnable("testTimer", queue, 10),
@@ -151,7 +164,6 @@ public class EventListTest {
     @Test
     public void testFixedDelay() throws InterruptedException {
         System.out.println("testFixedDelay");
-        ThreadPool threadPool = ThreadPool.getDefaultThreadPool();
 
         System.out.println("Scheduling at " + System.currentTimeMillis());
         LinkedBlockingQueue<String> queue = new LinkedBlockingQueue<String>();
@@ -186,7 +198,6 @@ public class EventListTest {
     public void testFixedRate() throws InterruptedException {
         System.out.println("Test FixedRate");
 
-        ThreadPool threadPool = ThreadPool.getDefaultThreadPool();
         LinkedBlockingQueue<String> queue = new LinkedBlockingQueue<String>();
 
         TestRunnableFuture trf = new TestRunnableFuture("testPeriodicTimer", queue, 1500);
