@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 
 class ThreadPoolRunnable implements MyCallableIfc<Boolean> {
 
-    private static Logger LOG = LoggerFactory.getLogger(ThreadPoolRunnable.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ThreadPoolRunnable.class);
 
     private final BlockingQueue<FutureTaskWithId<?>> queue;
 

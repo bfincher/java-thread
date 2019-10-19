@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class TraditionalThread extends Thread {
 
-    private static Logger LOG = LoggerFactory.getLogger(TraditionalThread.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TraditionalThread.class);
 
     private final Runnable target;
 

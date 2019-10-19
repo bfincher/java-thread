@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ThreadPool {
 
-    private static Logger LOG = LoggerFactory.getLogger(ThreadPool.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ThreadPool.class);
 
     private static final String IS_SHUTDOWN_MSG = "shutdown";
 
@@ -39,7 +39,7 @@ public class ThreadPool {
      * @param threadPoolName The name of this thread pool
      */
     public ThreadPool(int numThreads, String threadPoolName) {
-        threadList = new ArrayList<MyThread>(numThreads);
+        threadList = new ArrayList<>(numThreads);
 
         this.threadPoolName = threadPoolName;
         queueSizeWarningThreshold = Math.max(
@@ -89,7 +89,7 @@ public class ThreadPool {
             throw new IllegalStateException(IS_SHUTDOWN_MSG);
         }
 
-        FutureTaskWithId<Boolean> future = new FutureTaskWithId<Boolean>(task, true);
+        FutureTaskWithId<Boolean> future = new FutureTaskWithId<>(task, true);
         submit(future);
         return future;
     }
@@ -106,7 +106,7 @@ public class ThreadPool {
             throw new IllegalStateException(IS_SHUTDOWN_MSG);
         }
 
-        FutureTaskWithId<T> future = new FutureTaskWithId<T>(task);
+        FutureTaskWithId<T> future = new FutureTaskWithId<>(task);
         submit(future);
         return future;
     }

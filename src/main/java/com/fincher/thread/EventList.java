@@ -22,7 +22,7 @@ public class EventList {
     
     private static final String IS_TERMINATED_MSG = "terminated";
 
-    private class EventListRunnable implements MyCallableIfc<> {
+    private class EventListRunnable implements MyCallableIfc<Boolean> {
         /**
          * Performs maintenance on the EventMap. Events that should be executed now are removed from
          * the map and executed. Otherwise, this thread sleeps until the next execution time
@@ -83,7 +83,7 @@ public class EventList {
     }
 
     /** A list used to hold events to be executed in the future */
-    private BlockingQueue<EventWrapper> eventList = new PriorityBlockingQueue<EventWrapper>();
+    private BlockingQueue<EventWrapper> eventList = new PriorityBlockingQueue<>();
 
     /** The thread in which this EventList's maintenance thread is executed */
     private MyThread thread;

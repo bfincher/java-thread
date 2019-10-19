@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
  */
 class EventWrapper implements MyRunnableScheduledFuture<Boolean>, RunnableWithIdIfc {
 
-    private static Logger LOG = LoggerFactory.getLogger(EventWrapper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(EventWrapper.class);
 
     /** The body of this event. */
     private final RunnableWithIdIfc task;
@@ -68,10 +68,10 @@ class EventWrapper implements MyRunnableScheduledFuture<Boolean>, RunnableWithId
                 case TRY_TO_CANCEL:
                     setState(StateEnum.CANCELLED);
                     return;
-                    
+
                 case CANCELLED:
                     return;
-                    
+
                 default:
                     setState(StateEnum.RUNNING);
                     break;
@@ -92,8 +92,7 @@ class EventWrapper implements MyRunnableScheduledFuture<Boolean>, RunnableWithId
 
     @Override
     public long getDelay(TimeUnit unit) {
-        long delayInMillis = nextExecutionTime - System.currentTimeMillis();
-        return delayInMillis;
+        return nextExecutionTime - System.currentTimeMillis();
     }
 
     @Override
@@ -112,7 +111,7 @@ class EventWrapper implements MyRunnableScheduledFuture<Boolean>, RunnableWithId
             } else {
                 result = true;
             }
-            
+
             if (result) {
                 setState(StateEnum.CANCELLED);
             } else {
@@ -121,7 +120,8 @@ class EventWrapper implements MyRunnableScheduledFuture<Boolean>, RunnableWithId
         }
 
         if (LOG.isTraceEnabled()) {
-            LOG.trace("{} cancel:  mayInterruptIfRunning = {}.  Result = {}", getId(), mayInterruptIfRunning, result);
+            LOG.trace("{} cancel:  mayInterruptIfRunning = {}.  Result = {}", getId(),
+                    mayInterruptIfRunning, result);
         }
 
         return result;
@@ -145,26 +145,24 @@ class EventWrapper implements MyRunnableScheduledFuture<Boolean>, RunnableWithId
     }
 
     @Override
-    public Boolean get() throws InterruptedException, CancellationException {
-        
+    public Boolean get() throws InterruptedException {
 
         synchronized (stateEnumSynchronizer) {
             while (!isDone()) {
                 stateEnumSynchronizer.wait();
             }
-            
+
             if (isCancelled()) {
                 throw new CancellationException();
             }
-            
+
             return Boolean.TRUE;
         }
     }
 
     @Override
-    public Boolean get(long timeout, TimeUnit unit)
-            throws InterruptedException, CancellationException {
-        
+    public Boolean get(long timeout, TimeUnit unit) throws InterruptedException {
+
         long waitUntil = System.currentTimeMillis() + TimeUnit.MILLISECONDS.convert(timeout, unit);
         synchronized (stateEnumSynchronizer) {
             long timeToWait = waitUntil - System.currentTimeMillis();
@@ -172,13 +170,13 @@ class EventWrapper implements MyRunnableScheduledFuture<Boolean>, RunnableWithId
                 stateEnumSynchronizer.wait(timeToWait);
                 timeToWait = waitUntil - System.currentTimeMillis();
             }
-            
+
             if (isCancelled()) {
                 throw new CancellationException();
             }
-            
+
             return Boolean.TRUE;
-        } 
+        }
     }
 
     @Override
@@ -198,7 +196,7 @@ class EventWrapper implements MyRunnableScheduledFuture<Boolean>, RunnableWithId
     protected void postExecute() {
         setState(StateEnum.COMPLETED);
     }
-    
+
     protected StateEnum getState() {
         return state;
     }
