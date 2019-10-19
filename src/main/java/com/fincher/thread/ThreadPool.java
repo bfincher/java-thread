@@ -22,7 +22,7 @@ public class ThreadPool {
 
     private final List<MyThread> threadList;
 
-    private final LinkedBlockingQueue<FutureTaskWithId<?>> runnableQueue = new LinkedBlockingQueue<FutureTaskWithId<?>>();
+    private final LinkedBlockingQueue<FutureTaskWithId<?>> runnableQueue = new LinkedBlockingQueue<>();
 
     private boolean isShutdown = false;
 

@@ -31,7 +31,7 @@ class EventWrapper implements MyRunnableScheduledFuture<Boolean>, RunnableWithId
 
     /** The state of this event */
     protected enum StateEnum {
-        PENDING, RUNNING, CANCELLED, COMPLETED
+        PENDING, RUNNING, CANCELLED, TRY_TO_CANCEL, COMPLETED
     }
 
     private StateEnum state = StateEnum.PENDING;
@@ -64,11 +64,18 @@ class EventWrapper implements MyRunnableScheduledFuture<Boolean>, RunnableWithId
     @Override
     public void run() {
         synchronized (stateEnumSynchronizer) {
-            if (state == StateEnum.CANCELLED) {
-                return;
+            switch (state) {
+                case TRY_TO_CANCEL:
+                    setState(StateEnum.CANCELLED);
+                    return;
+                    
+                case CANCELLED:
+                    return;
+                    
+                default:
+                    setState(StateEnum.RUNNING);
+                    break;
             }
-
-            setState(StateEnum.RUNNING);
         }
 
         currentThread = Thread.currentThread();
@@ -105,11 +112,12 @@ class EventWrapper implements MyRunnableScheduledFuture<Boolean>, RunnableWithId
             } else {
                 result = true;
             }
-        }
             
-
-        if (result) {
-            setState(StateEnum.CANCELLED);
+            if (result) {
+                setState(StateEnum.CANCELLED);
+            } else {
+                setState(StateEnum.TRY_TO_CANCEL);
+            }
         }
 
         if (LOG.isTraceEnabled()) {
@@ -189,6 +197,10 @@ class EventWrapper implements MyRunnableScheduledFuture<Boolean>, RunnableWithId
     /** Is called after the event is executed */
     protected void postExecute() {
         setState(StateEnum.COMPLETED);
+    }
+    
+    protected StateEnum getState() {
+        return state;
     }
 
     /**

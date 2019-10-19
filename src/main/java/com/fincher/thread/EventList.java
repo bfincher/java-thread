@@ -18,11 +18,11 @@ import org.slf4j.LoggerFactory;
  */
 public class EventList {
 
-    private static Logger LOG = LoggerFactory.getLogger(EventList.class);
+    private static final Logger LOG = LoggerFactory.getLogger(EventList.class);
     
     private static final String IS_TERMINATED_MSG = "terminated";
 
-    private class EventListRunnable implements MyCallableIfc<Boolean> {
+    private class EventListRunnable implements MyCallableIfc<> {
         /**
          * Performs maintenance on the EventMap. Events that should be executed now are removed from
          * the map and executed. Otherwise, this thread sleeps until the next execution time

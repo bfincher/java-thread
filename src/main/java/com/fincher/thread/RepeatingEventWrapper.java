@@ -26,10 +26,22 @@ abstract class RepeatingEventWrapper extends EventWrapper {
     @Override
     protected void postExecute() {
         synchronized (stateEnumSynchronizer) {
-            if (!isCancelled()) {
-                nextExecutionTime = getNextExecutionTime();
-                parentEventList.addToEventList(this);
-                setState(StateEnum.PENDING);
+            switch (getState()) {
+                case CANCELLED:
+                    // do nothing
+                    break;
+                    
+                case TRY_TO_CANCEL:
+                    setState(StateEnum.CANCELLED);
+                    break;
+                    
+                case COMPLETED:
+                case PENDING:
+                case RUNNING:
+                    nextExecutionTime = getNextExecutionTime();
+                    parentEventList.addToEventList(this);
+                    setState(StateEnum.PENDING);
+                    break;
             }
         }
     }

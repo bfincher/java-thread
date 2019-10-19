@@ -1,14 +1,19 @@
 package com.fincher.thread;
 
 import static junit.framework.Assert.fail;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
+import java.time.Duration;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
+import org.awaitility.Awaitility;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -73,24 +78,21 @@ public class EventListTest {
 
         @Override
         public void run() {
+            System.out.println("adding to queue");
             queue.add(id + " executing " + System.currentTimeMillis());
             if (sleepTime > 0) {
-                try {
-                    Thread.sleep(sleepTime);
-                } catch (InterruptedException ie) {
-                    ie.printStackTrace();
-                }
+                Awaitility.await().atLeast(Duration.ofMillis(sleepTime));
             }
         }
     }
-    
+
     private ThreadPool threadPool;
-    
+
     @Before
     public void setUp() {
         threadPool = new ThreadPool(10, "defaultThreadPool");
     }
-    
+
     @After
     public void tearDown() {
         threadPool.shutdown();
@@ -102,7 +104,7 @@ public class EventListTest {
      * 
      * @throws InterruptedException
      */
-    @Test
+    @Test(timeout = 5000)
     public void testTimer() throws InterruptedException {
         System.out.println("testTimer");
         final long startTime = System.currentTimeMillis();
@@ -119,12 +121,7 @@ public class EventListTest {
             fail(e.getMessage());
         }
 
-        Thread.sleep(100);
-        int size = queue.size();
-        if (size != 10) {
-            System.out.println("size = " + size);
-            fail("size = " + size);
-        }
+        Awaitility.await().until(() -> queue.size() == 10);
 
         long endTime = System.currentTimeMillis();
 
@@ -147,13 +144,9 @@ public class EventListTest {
 
         future.cancel(false);
 
-        Thread.sleep(1500);
+        Awaitility.await().atLeast(2, TimeUnit.SECONDS);
 
-        int size = queue.size();
-        if (size != 0) {
-            System.out.println(size);
-            fail();
-        }
+        assertTrue(queue.isEmpty());
     }
 
     /**
@@ -181,12 +174,8 @@ public class EventListTest {
             e.printStackTrace();
             fail(e.getMessage());
         }
-
-        int size = queue.size();
-        if (size != 10) {
-            System.out.println(size);
-            fail();
-        }
+        
+        assertEquals(10, queue.size());
     }
 
     /**
@@ -194,7 +183,7 @@ public class EventListTest {
      * 
      * @throws InterruptedException
      */
-    @Test
+    @Test(timeout = 15000)
     public void testFixedRate() throws InterruptedException {
         System.out.println("Test FixedRate");
 
@@ -204,7 +193,8 @@ public class EventListTest {
 
         Future<?> future = threadPool.scheduleAtFixedRate(trf, 0, 2000);
 
-        Thread.sleep(10000);
+        Awaitility.await().until(() -> queue.size() >= 5);
+
         future.cancel(false);
 
         try {
@@ -216,11 +206,7 @@ public class EventListTest {
             fail(e.getMessage());
         }
 
-        int size = queue.size();
-        if (size != 5) {
-            System.out.println(size);
-            fail();
-        }
+        assertEquals(5, queue.size());
     }
 
 }
