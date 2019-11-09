@@ -14,8 +14,8 @@ version = '2.1.0'
 
 description = """Thread Utilities"""
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+sourceCompatibility = 1.11
+targetCompatibility = 1.11
 
 
 
