@@ -1,5 +1,8 @@
 package com.fincher.thread;
 
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,8 +53,8 @@ public class MyThread extends Thread implements Runnable, MyThreadIfc {
 
     /** The user's object that will be invoked upon each thread iteration */
     private final MyRunnableIfc runnable;
-    
-    private final MyCallableIfc<Boolean> callable;
+
+    private final MyCallableIfc<?> callable;
 
     /** Used to notify the user of any exceptions in the thread's body */
     private ExceptionHandlerIfc exceptionHandler = null;
@@ -72,14 +75,14 @@ public class MyThread extends Thread implements Runnable, MyThreadIfc {
         this.runnable = runnable;
         callable = null;
     }
-    
+
     /**
      * Constructs a new MyThread
      * 
      * @param name     The name of this thread
      * @param runnable To be invoked upon each thread iteration
      */
-    public MyThread(String name, MyCallableIfc<Boolean> callable) {
+    public MyThread(String name, MyCallableIfc<?> callable) {
         super(name);
         this.callable = callable;
         runnable = null;
@@ -113,7 +116,7 @@ public class MyThread extends Thread implements Runnable, MyThreadIfc {
             } catch (Throwable t) {
                 handleException(t);
             }
-            
+
             if (runnable != null) {
                 continueExecution = runnable.continueExecution();
             } else {
@@ -128,7 +131,7 @@ public class MyThread extends Thread implements Runnable, MyThreadIfc {
     public void terminate() {
         terminate = true;
         interrupt();
-        
+
         if (runnable != null) {
             runnable.terminate();
         } else {
@@ -142,10 +145,35 @@ public class MyThread extends Thread implements Runnable, MyThreadIfc {
     }
 
     /** Gets the runnable object associated with this thread */
-    public MyRunnableIfc getRunnable() {
-        return runnable;
+    public Optional<MyRunnableIfc> getRunnable() {
+        return Optional.ofNullable(runnable);
     }
-    
+
+    @Override
+    public Optional<MyCallableIfc<?>> getCallable() {
+        return Optional.ofNullable(callable);
+    }
+
+    /**
+     * Wait on the given object until the given time has elapsed
+     * 
+     * @param time     The time to wait
+     * @param timeUnit The wait time unit
+     * @param o        The object to wait on
+     * @throws InterruptedException If the wait is interrupted
+     */
+    public static void wait(long time, TimeUnit timeUnit, Object o) throws InterruptedException {
+        long sleepUntil = System.nanoTime() + TimeUnit.NANOSECONDS.convert(time, timeUnit);
+
+        synchronized (o) {
+            long currentNanos = System.nanoTime();
+            while (currentNanos < sleepUntil) {
+                o.wait();
+                currentNanos = System.nanoTime();
+            }
+        }
+    }
+
     private void handleException(Throwable t) {
         if (exceptionHandler == null) {
             LOG.error(getName() + " " + t.getMessage(), t);

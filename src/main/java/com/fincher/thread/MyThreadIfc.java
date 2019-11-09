@@ -1,5 +1,7 @@
 package com.fincher.thread;
 
+import java.util.Optional;
+
 /** A Thread abstraction */
 public interface MyThreadIfc {
 
@@ -58,6 +60,14 @@ public interface MyThreadIfc {
      * 
      * @return The runnable object associated with this thread
      */
-    public MyRunnableIfc getRunnable();
+    public Optional<MyRunnableIfc> getRunnable();
+    
+    
+    /**
+     * Gets the callable object associated with this thread
+     * 
+     * @return The callable object associated with this thread
+     */
+    public Optional<MyCallableIfc<?>> getCallable();
 
 }

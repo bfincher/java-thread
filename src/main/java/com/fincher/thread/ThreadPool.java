@@ -1,188 +1,56 @@
 package com.fincher.thread;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Multiple threads that are used to perform various tasks
- * 
- * @author Brian Fincher
- *
- */
-public class ThreadPool {
-
+public class ThreadPool extends ScheduledThreadPoolExecutor {
+    
     private static final Logger LOG = LoggerFactory.getLogger(ThreadPool.class);
-
-    private static final String IS_SHUTDOWN_MSG = "shutdown";
-
-    private final List<MyThread> threadList;
-
-    private final LinkedBlockingQueue<FutureTaskWithId<?>> runnableQueue = new LinkedBlockingQueue<>();
-
-    private boolean isShutdown = false;
-
-    private final EventList eventList;
-
-    private final String threadPoolName;
-
-    private final int queueSizeWarningThreshold;
-
-    /**
-     * Constructs a new ThreadPool.
-     * 
-     * @param numThreads     The maximum number of threads in the thread pool
-     * @param threadPoolName The name of this thread pool
-     */
-    public ThreadPool(int numThreads, String threadPoolName) {
-        threadList = new ArrayList<>(numThreads);
-
-        this.threadPoolName = threadPoolName;
-        queueSizeWarningThreshold = Math.max(
-                new Integer(System.getProperty("min.thread.pool.size.warning", "250")),
-                numThreads * 2);
-
-        for (int i = 0; i < numThreads; i++) {
-            String id = "ThreadPool_" + this.threadPoolName + "_" + i;
-
-            MyThread thread = new MyThread(id, new ThreadPoolRunnable(runnableQueue));
-
-            thread.start();
-            threadList.add(thread);
-        }
-
-        eventList = new EventList(this);
-    }
-
-    /**
-     * Set a handler to be notified upon occurrence of exceptions.
-     * 
-     * @param exceptionHandler The exception handler
-     */
-    public void setExceptionHandler(ExceptionHandlerIfc exceptionHandler) {
-        for (MyThread thread : threadList) {
-            thread.setExceptionHandler(exceptionHandler);
+    
+    private static class ThreadPoolThreadFactory implements ThreadFactory {
+        protected static AtomicInteger nextId = new AtomicInteger(1);
+        
+        @Override
+        public Thread newThread(Runnable r) {
+            return new Thread(r, "ThreadPool_" + nextId.getAndIncrement());
         }
     }
 
-    private void submit(FutureTaskWithId<?> future) throws InterruptedException {
-        if (runnableQueue.size() > queueSizeWarningThreshold) {
-            LOG.warn("{} Warning.  Thread pool queue size = {}", threadPoolName,
-                    runnableQueue.size());
+    public ThreadPool(int corePoolSize) {
+        super(corePoolSize, new ThreadPoolThreadFactory());
+    }
+    
+    public ThreadPool(int corePoolSize, RejectedExecutionHandler handler) {
+        super(corePoolSize, new ThreadPoolThreadFactory(), handler);
+    }
+    
+    
+    protected void beforeExecute(Thread t, Runnable r) {
+        if (r instanceof RunnableWithIdIfc) {
+            LOG.info("Begin executing {}", ((RunnableWithIdIfc)r).getId());
         }
-
-        runnableQueue.put(future);
     }
-
-    /**
-     * Submit a task to be executed on the thread pool.
-     * 
-     * @param task The task to be executed
-     * @return a Future representing pending completion of the task
-     */
-    public Future<Boolean> submit(RunnableWithIdIfc task) throws InterruptedException {
-        if (isShutdown) {
-            throw new IllegalStateException(IS_SHUTDOWN_MSG);
+    
+    protected void afterExecute(Runnable r, Throwable t) {
+        String id = null;
+        if (r instanceof RunnableWithIdIfc) {
+            id = ((RunnableWithIdIfc)r).getId();
+            LOG.info("Finished executing {}", id);
         }
-
-        FutureTaskWithId<Boolean> future = new FutureTaskWithId<>(task, true);
-        submit(future);
-        return future;
-    }
-
-    /**
-     * Submit a task to be executed on the thread pool.
-     * 
-     * @param task The task to be executed
-     * @param      <T> The type of data
-     * @return a Future representing pending completion of the task
-     */
-    public <T> Future<T> submit(CallableWithIdIfc<T> task) throws InterruptedException {
-        if (isShutdown) {
-            throw new IllegalStateException(IS_SHUTDOWN_MSG);
+        
+        if (t != null) {
+            StringBuilder sb = new StringBuilder();
+            if (id != null) {
+                sb.append(id + " ");
+            }
+            sb.append("exception thrown by event: ");
+            LOG.error(sb.toString(), t);
         }
-
-        FutureTaskWithId<T> future = new FutureTaskWithId<>(task);
-        submit(future);
-        return future;
     }
 
-    /**
-     * Creates and executes a one-shot action that becomes enabled after the given delay.
-     *
-     * @param command the task to execute
-     * @param delay   the time from now to delay execution
-     * @return A Future task used to control the event
-     */
-    public MyRunnableScheduledFuture<Boolean> schedule(RunnableWithIdIfc command, long delay) {
-
-        if (isShutdown) {
-            throw new IllegalStateException(IS_SHUTDOWN_MSG);
-        }
-
-        return eventList.schedule(command, delay);
-    }
-
-    /**
-     * Creates and executes a periodic action that becomes enabled first after the given initial
-     * delay, and subsequently with the given delay between the termination of one execution and the
-     * commencement of the next.
-     * 
-     * @param command      The task to execute
-     * @param initialDelay The time to delay first execution
-     * @param period       The period between executions
-     * @return A Future task used to control the event
-     */
-    public MyRunnableScheduledFuture<Boolean> scheduleWithFixedDelay(RunnableWithIdIfc command,
-            long initialDelay, long period) {
-
-        if (isShutdown) {
-            throw new IllegalStateException(IS_SHUTDOWN_MSG);
-        }
-
-        return eventList.scheduleWithFixedDelay(command, initialDelay, period);
-    }
-
-    /**
-     * Creates and executes a periodic action that becomes enabled first after the given initial
-     * delay, and subsequently with the given delay between the start of one execution and the
-     * commencement of the next (however, subsequent executions will not begin until previous
-     * executions have completed).
-     * 
-     * @param command      The task to execute
-     * @param initialDelay The time to delay first execution
-     * @param period       The period between executions
-     * @return A Future task used to control the event
-     */
-    public MyRunnableScheduledFuture<Boolean> scheduleAtFixedRate(RunnableWithIdIfc command,
-            long initialDelay, long period) {
-
-        if (isShutdown) {
-            throw new IllegalStateException(IS_SHUTDOWN_MSG);
-        }
-
-        return eventList.scheduleAtFixedRate(command, initialDelay, period);
-    }
-
-    /** Shutdown this ThreadPool. */
-    public final void shutdown() {
-        isShutdown = true;
-
-        eventList.shutdown();
-
-        for (MyThread thread : threadList) {
-            thread.terminate();
-        }
-
-        runnableQueue.clear();
-        threadList.clear();
-    }
-
-    public LinkedBlockingQueue<FutureTaskWithId<?>> getQueue() {
-        return runnableQueue;
-    }
 }
