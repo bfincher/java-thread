@@ -3,8 +3,8 @@ package com.fincher.thread;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * <pre>
@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
  */
 public class MyThread extends Thread implements Runnable, MyThreadIfc {
 
-    private static final Logger LOG = LoggerFactory.getLogger(MyThread.class);
+    private static final Logger LOG = LogManager.getLogger();
 
     /** Should this thread terminate? */
     private volatile boolean terminate = false;
@@ -163,12 +163,18 @@ public class MyThread extends Thread implements Runnable, MyThreadIfc {
      * @throws InterruptedException If the wait is interrupted
      */
     public static void wait(long time, TimeUnit timeUnit, Object o) throws InterruptedException {
+        final int nanosPerMilli = 1000000;
         long sleepUntil = System.nanoTime() + TimeUnit.NANOSECONDS.convert(time, timeUnit);
 
         synchronized (o) {
             long currentNanos = System.nanoTime();
+            
             while (currentNanos < sleepUntil) {
-                o.wait();
+                long totalNanosToWait = sleepUntil - currentNanos;
+                long millisToWait = totalNanosToWait / nanosPerMilli;
+                int nanosToWait = (int)(totalNanosToWait - millisToWait * nanosPerMilli);
+                
+                o.wait(millisToWait, nanosToWait);
                 currentNanos = System.nanoTime();
             }
         }

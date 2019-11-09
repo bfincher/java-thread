@@ -5,12 +5,12 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class ThreadPool extends ScheduledThreadPoolExecutor {
     
-    private static final Logger LOG = LoggerFactory.getLogger(ThreadPool.class);
+    private static final Logger LOG = LogManager.getLogger();
     
     private static class ThreadPoolThreadFactory implements ThreadFactory {
         protected static AtomicInteger nextId = new AtomicInteger(1);
