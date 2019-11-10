@@ -253,10 +253,10 @@ public class ThreadPoolTest {
             System.out.println("Scheduling at " + System.currentTimeMillis());
             LinkedBlockingQueue<String> queue = new LinkedBlockingQueue<String>();
             Future<?> future = threadPool.scheduleWithFixedDelay(
-                    new TestEventRunnableFuture("testPeriodicTimer", queue), 500, 1000,
+                    new TestEventRunnableFuture("testPeriodicTimer", queue), 250, 500,
                     TimeUnit.MILLISECONDS);
 
-            Thread.sleep(10000);
+            MyThread.wait(1, TimeUnit.SECONDS, this);
             future.cancel(false);
 
             try {
@@ -268,7 +268,7 @@ public class ThreadPoolTest {
                 fail(e.getMessage());
             }
 
-            assertEquals(10, queue.size());
+            assertEquals(2, queue.size());
         } finally {
             threadPool.shutdown();
         }
