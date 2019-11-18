@@ -2,6 +2,7 @@ package com.fincher.thread;
 
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BooleanSupplier;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -50,11 +51,15 @@ public class MyThread extends Thread implements Runnable, MyThreadIfc {
 
     /** Should this thread terminate? */
     private volatile boolean terminate = false;
-
-    /** The user's object that will be invoked upon each thread iteration */
-    private final MyRunnableIfc runnable;
-
-    private final MyCallableIfc<?> callable;
+    
+    private final Runnable runnable;
+    
+    private final BooleanSupplier continueExecutionMethod;
+    
+    private final Runnable terminateMethod;
+    
+    private final Optional<MyRunnableIfc> userRunnable;
+    private final Optional<MyCallableIfc<?>> userCallable;
 
     /** Used to notify the user of any exceptions in the thread's body */
     private ExceptionHandlerIfc exceptionHandler = null;
@@ -72,8 +77,11 @@ public class MyThread extends Thread implements Runnable, MyThreadIfc {
      */
     public MyThread(String name, MyRunnableIfc runnable) {
         super(name);
+        userRunnable = Optional.of(runnable);
+        userCallable = Optional.empty();
         this.runnable = runnable;
-        callable = null;
+        terminateMethod = runnable::terminate;
+        continueExecutionMethod = runnable::continueExecution;
     }
 
     /**
@@ -84,8 +92,18 @@ public class MyThread extends Thread implements Runnable, MyThreadIfc {
      */
     public MyThread(String name, MyCallableIfc<?> callable) {
         super(name);
-        this.callable = callable;
-        runnable = null;
+        userCallable = Optional.of(callable);
+        userRunnable = Optional.empty();
+        continueExecutionMethod = callable::continueExecution;
+        terminateMethod = callable::terminate;
+        
+        runnable = () -> {
+            try {
+                callable.call();
+            } catch (Exception e) {
+                handleException(e);
+            }
+        };
     }
 
     /**
@@ -108,20 +126,12 @@ public class MyThread extends Thread implements Runnable, MyThreadIfc {
         boolean continueExecution;
         do {
             try {
-                if (runnable != null) {
-                    runnable.run();
-                } else {
-                    callable.call();
-                }
+                runnable.run();
             } catch (Throwable t) {
                 handleException(t);
             }
 
-            if (runnable != null) {
-                continueExecution = runnable.continueExecution();
-            } else {
-                continueExecution = callable.continueExecution();
-            }
+            continueExecution = continueExecutionMethod.getAsBoolean();
         } while (!terminate && continueExecution);
 
         LOG.debug("{} terminated", getName());
@@ -132,11 +142,7 @@ public class MyThread extends Thread implements Runnable, MyThreadIfc {
         terminate = true;
         interrupt();
 
-        if (runnable != null) {
-            runnable.terminate();
-        } else {
-            callable.terminate();
-        }
+        terminateMethod.run();
     }
 
     /** Has this thread been terminated */
@@ -146,12 +152,12 @@ public class MyThread extends Thread implements Runnable, MyThreadIfc {
 
     /** Gets the runnable object associated with this thread */
     public Optional<MyRunnableIfc> getRunnable() {
-        return Optional.ofNullable(runnable);
+        return userRunnable;
     }
 
     @Override
     public Optional<MyCallableIfc<?>> getCallable() {
-        return Optional.ofNullable(callable);
+        return userCallable;
     }
 
     /**
@@ -162,7 +168,7 @@ public class MyThread extends Thread implements Runnable, MyThreadIfc {
      * @param o        The object to wait on
      * @throws InterruptedException If the wait is interrupted
      */
-    public static void wait(long time, TimeUnit timeUnit, Object o) throws InterruptedException {
+    public static void wait(long time, TimeUnit timeUnit, final Object o) throws InterruptedException {
         final int nanosPerMilli = 1000000;
         long sleepUntil = System.nanoTime() + TimeUnit.NANOSECONDS.convert(time, timeUnit);
 
