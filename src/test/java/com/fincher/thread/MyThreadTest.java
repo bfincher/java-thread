@@ -1,6 +1,7 @@
 package com.fincher.thread;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.concurrent.BlockingQueue;
@@ -20,8 +21,8 @@ public class MyThreadTest {
      */
     @Test
     public void testThreadWithExceptionContinueExecution() throws InterruptedException {
-        MyThreadIfc thread = new MyThread("TestThread", new MyRunnableIfc() {
-
+        
+        MyRunnableIfc runnable = new MyRunnableIfc() {
             @Override
             public void run() {
                 try {
@@ -42,15 +43,47 @@ public class MyThreadTest {
             @Override
             public void terminate() {
             }
-        });
-
+         
+        };
+        
+        MyThreadIfc thread = new MyThread("TestThread", runnable);
+        assertEquals(runnable, thread.getRunnable().get());
         thread.start();
-
         Thread.sleep(2000);
+        assertFalse("Thread did not continue after Exception", thread.isTerminated());
 
-        if (thread.isTerminated()) {
-            Assert.fail("Thread did not continue after Exception");
-        }
+        thread.terminate();
+        
+        MyCallableIfc<Boolean> callable = new MyCallableIfc<Boolean>() { 
+            @Override
+            public Boolean call() {
+                try {
+                    System.out.println("Thread running");
+                    Thread.sleep(500);
+                    throw new Error("Test Exception");
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                
+                return true;
+
+            }
+
+            @Override
+            public boolean continueExecution() {
+                return true;
+            }
+
+            @Override
+            public void terminate() {
+            }
+        };
+        
+        thread = new MyThread("TestThread", callable);
+        assertEquals(callable, thread.getCallable().get());
+        thread.start();
+        Thread.sleep(2000);
+        assertFalse("Thread did not continue after Exception", thread.isTerminated());
 
         thread.terminate();
     }
