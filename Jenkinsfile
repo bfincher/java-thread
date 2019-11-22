@@ -8,11 +8,15 @@ pipeline {
 	    string(defaultValue: null, description: 'Perform a release with the given version', name: 'release')
 	}
 
-        if (params.release) {
-            performRelease = true
-        }
 	
 	stages {
+		stage('Prepare') {
+		    steps {
+                       if (params.release) {
+                           performRelease = true
+                       }
+		    }
+		}
 		stage('Build') {
 			steps {
 				sh 'gradle --no-daemon clean build -x checkstyleMain -x checkstyleTest'
