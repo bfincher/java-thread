@@ -1,8 +1,9 @@
+def performRelease = false
+
 pipeline {
 
 	agent any
 
-        def performRelease = false
 	parameters {
 	    string(defaultValue: null, description: 'Perform a release with the given version', name: 'release')
 	}
