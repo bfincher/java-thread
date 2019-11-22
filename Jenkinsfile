@@ -1,7 +1,18 @@
 def performRelease = false
+def gradleOpts = '--no-daemon --info -s'
 
 properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10')), 
 disableConcurrentBuilds(), pipelineTriggers([[$class: 'PeriodicFolderTrigger', interval: '1d']])])
+
+node {
+	publishHTML([allowMissing: false, 
+		alwaysLinkToLastBuild: false, 
+		keepAll: true, 
+		reportDir: 'build/reports/tests/test', 
+		reportFiles: 'index.html', 
+		reportName: 'JUNIT HTML Report', 
+		reportTitles: ''])
+}
 
 pipeline {
 
@@ -15,18 +26,18 @@ pipeline {
 	
 	stages {
 		stage('Prepare') {
-                    steps {
-                        script {
-                           if (!params.release.isEmpty()) {
-                               performRelease = true
-                           }
-                        }
-                    }
+            steps {
+                script {
+                   if (!params.release.isEmpty()) {
+                       performRelease = true
+                   }                           
+               }
+            }
 		}
 		
 		stage('Build') {
 			steps {
-				sh 'gradle --no-daemon clean build checkstyleMain checkstyleTest'
+				sh './gradlew clean build checkstyleMain checkstyleTest ' + gradleOpts
 			}
 		}
 
@@ -35,10 +46,11 @@ pipeline {
 
 		    steps {
 			sh """
-		        gradle --no-daemon sonarqube \
+		        ./gradlew sonarqube \
 			-Dsonar.projectKey=java-thread \
 		  	-Dsonar.host.url=http://192.168.1.2:9000 \
-			-Dsonar.login=c52f06414e05db27d93a294d7ee60c601d2675b0
+			-Dsonar.login=c52f06414e05db27d93a294d7ee60c601d2675b0 \
+			$gradleOpts
 			"""
 		    }
 		}
@@ -46,13 +58,13 @@ pipeline {
 		stage('Release') {
 		    when { expression { performRelease } }
 		    steps {
-		        sh "gradle release -Prelease.releaseVersion=${params.release} -Prelease.newVersion=${params.release}-SNAPSHOT"
+		        sh "./gradlew release -Prelease.releaseVersion=${params.release} -Prelease.newVersion=${params.release}-SNAPSHOT " + gradleOpts
 		    }
 		}
 		
 		stage('Publish') {
 		    steps {
-		        sh 'gradle --no-daemon publish'
+		        sh './gradlew publish ' + gradleOpts
 		    }
 		}
 	}
