@@ -11,11 +11,9 @@ pipeline {
 	
 	stages {
 		stage('Prepare') {
-		    steps {
                        if (params.release) {
                            performRelease = true
                        }
-		    }
 		}
 		stage('Build') {
 			steps {
