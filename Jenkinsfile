@@ -6,6 +6,7 @@ pipeline {
 
 	parameters {
 	    string(defaultValue: '', description: 'Perform a release with the given version', name: 'release')
+	    booleanParam(name: 'runSonarqube', defaultValue: true, description: 'Run SonarQube')
 	}
 
 	
@@ -19,28 +20,19 @@ pipeline {
                         }
                     }
 		}
+		
 		stage('Build') {
 			steps {
-				sh 'gradle --no-daemon clean build -x checkstyleMain -x checkstyleTest'
+				sh 'gradle --no-daemon clean build checkstyleMain checkstyleTest'
 			}
-		}
-		
-		stage('Checkstyle') {
-		    steps {
-		        sh 'gradle --no-daemon checkstyleMain checkstyleTest'
-		    }
-		}
-		
-		stage('Publish') {
-		    steps {
-		        sh 'gradle --no-daemon publish'
-		    }
 		}
 
 		stage('Sonarqube') {
+			when { expression { params.runSonarqube }}
+
 		    steps {
 			sh """
-		        gradle sonarqube \
+		        gradle --no-deamon sonarqube \
 			-Dsonar.projectKey=java-thread \
 		  	-Dsonar.host.url=http://192.168.1.2:9000 \
 			-Dsonar.login=c52f06414e05db27d93a294d7ee60c601d2675b0
@@ -52,6 +44,12 @@ pipeline {
 		    when { expression { performRelease } }
 		    steps {
 		        sh "gradle release -Prelease.releaseVersion=${params.release} -Prelease.newVersion=${params.release}-SNAPSHOT"
+		    }
+		}
+		
+		stage('Publish') {
+		    steps {
+		        sh 'gradle --no-daemon publish'
 		    }
 		}
 	}
