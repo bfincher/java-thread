@@ -12,10 +12,11 @@ pipeline {
 	stages {
 		stage('Prepare') {
                     steps {
-                    script {
-                       if (params.release) {
-                           performRelease = true
-                       }
+                        script {
+                           if (params.release) {
+                               performRelease = true
+                           }
+                        }
                     }
 		}
 		stage('Build') {
