@@ -37,9 +37,7 @@ pipeline {
 		}
 
 		stage('Release') {
-		    when {
-		        params.release != null
-		    }
+		    when { expression { params.release != null } }
 		    steps {
 		        sh "gradle release -Prelease.releaseVersion=${params.release} -Prelease.newVersion=${params.release}-SNAPSHOT"
 		    }
