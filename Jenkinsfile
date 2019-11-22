@@ -5,7 +5,7 @@ pipeline {
 	agent any
 
 	parameters {
-	    string(defaultValue: null, description: 'Perform a release with the given version', name: 'release')
+	    string(defaultValue: '', description: 'Perform a release with the given version', name: 'release')
 	}
 
 	
