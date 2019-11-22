@@ -13,7 +13,7 @@ pipeline {
 		stage('Prepare') {
                     steps {
                         script {
-                           if (params.release) {
+                           if (!params.release.isEmpty()) {
                                performRelease = true
                            }
                         }
