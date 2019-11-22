@@ -17,7 +17,7 @@ pipeline {
 		
 		stage('Publish') {
 		    steps {
-		        sh 'gradle --no-daemon publishToMavenLocal'
+		        sh 'gradle --no-daemon publish'
 		    }
 		}
 
