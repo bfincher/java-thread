@@ -67,3 +67,7 @@ checkstyle {
 //    toolVersion "8.24"
 }
 
+release {
+    requireBranch ''
+}
+
