@@ -11,12 +11,12 @@ pipeline {
 	
 	stages {
 		stage('Prepare') {
-                    evaluate {
+                    steps {
+                    script {
                        if (params.release) {
                            performRelease = true
                        }
                     }
-                    steps { echo ""}
 		}
 		stage('Build') {
 			steps {
