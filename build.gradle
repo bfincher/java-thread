@@ -68,6 +68,8 @@ checkstyle {
 }
 
 release {
-    requireBranch ''
+    git {
+        requireBranch = ''
+    }
 }
 
