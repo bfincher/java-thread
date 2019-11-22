@@ -2,9 +2,14 @@ pipeline {
 
 	agent any
 
+        def performRelease = false
 	parameters {
 	    string(defaultValue: null, description: 'Perform a release with the given version', name: 'release')
 	}
+
+        if (params.release) {
+            performRelease = true
+        }
 	
 	stages {
 		stage('Build') {
@@ -37,7 +42,7 @@ pipeline {
 		}
 
 		stage('Release') {
-		    when { expression { params.release != null } }
+		    when { expression { performRelease } }
 		    steps {
 		        sh "gradle release -Prelease.releaseVersion=${params.release} -Prelease.newVersion=${params.release}-SNAPSHOT"
 		    }
