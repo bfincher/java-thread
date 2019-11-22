@@ -15,7 +15,7 @@ pipeline {
                        if (params.release) {
                            performRelease = true
                        }
-                    {
+                    }
 		}
 		stage('Build') {
 			steps {
