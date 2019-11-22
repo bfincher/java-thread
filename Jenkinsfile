@@ -16,7 +16,7 @@ pipeline {
                            performRelease = true
                        }
                     }
-                    steps {}
+                    steps { echo ""}
 		}
 		stage('Build') {
 			steps {
