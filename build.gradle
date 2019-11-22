@@ -11,7 +11,6 @@ apply plugin: 'checkstyle'
 apply plugin: 'jacoco'
 
 group = 'com.fincher'
-version = '2.1.0-SNAPSHOT'
 
 description = """Thread Utilities"""
 
