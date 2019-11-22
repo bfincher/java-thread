@@ -10,17 +10,17 @@ apply plugin: 'checkstyle'
 apply plugin: 'jacoco'
 
 group = 'com.fincher'
-version = '2.1.0'
+version = '2.1.0-SNAPSHOT'
 
 description = """Thread Utilities"""
 
 sourceCompatibility = 1.11
 targetCompatibility = 1.11
 
-
+def baseNexusUrl = "http://192.168.1.2:8082/nexus/content/"
 
 repositories {
-     maven { url "https://repo.maven.apache.org/maven2" }
+     maven { url "${baseNexusUrl}groups/public" }
 }
 
 dependencies {
@@ -39,8 +39,25 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
 	    from components.java
-            artifact tasks.sourcesJar
 	}
+    }
+
+    repositories {
+        maven {
+	    credentials {
+	        username = "upload"
+		password = "upload"
+            }
+		
+	    if (project.version.endsWith('-SNAPSHOT')) {
+	        url "${baseNexusUrl}repositories/snapshots"
+	    } else {
+	        url "${baseNexusUrl}repositories/releases"
+	    }
+            authentication {
+                basic(BasicAuthentication)
+            }
+        }
     }
 }
 
