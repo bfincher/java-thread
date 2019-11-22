@@ -145,7 +145,7 @@ public class MyThreadTest {
         MyThread.wait(1, TimeUnit.SECONDS, this);
         long timeStop = System.currentTimeMillis();
         long delta = timeStop - timeStart;
-        assertTrue("delta = " + delta, delta < 1100);
+        assertTrue("delta = " + delta, delta < 2000);
     }
 
     @Test
