@@ -1,5 +1,6 @@
 package com.fincher.thread;
 
+import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
@@ -184,6 +185,18 @@ public class MyThread extends Thread implements Runnable, MyThreadIfc {
                 currentNanos = System.nanoTime();
             }
         }
+    }
+    
+    
+    /**
+     * Wait on the given object until the given time has elapsed
+     * 
+     * @param duration     The time to wait
+     * @param o        The object to wait on
+     * @throws InterruptedException If the wait is interrupted
+     */
+    public static void wait(Duration duration, final Object o) throws InterruptedException {
+        wait(duration.toNanos(), TimeUnit.NANOSECONDS, o);
     }
 
     private void handleException(Throwable t) {

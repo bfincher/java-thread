@@ -12,7 +12,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
 import org.awaitility.Awaitility;
 import org.junit.Assert;
@@ -190,7 +189,7 @@ public class ThreadPoolTest {
 
             BlockingQueue<String> queue = new LinkedBlockingQueue<String>();
             ScheduledFuture<?> future = threadPool.schedule(
-                    new TestEventRunnable("testTimer", queue, 10), 500, TimeUnit.MILLISECONDS);
+                    new TestEventRunnable("testTimer", queue, 10), Duration.ofMillis(500));
 
             try {
                 System.out.println(future.get());
@@ -225,11 +224,11 @@ public class ThreadPoolTest {
 
             BlockingQueue<String> queue = new LinkedBlockingQueue<String>();
             ScheduledFuture<?> future = threadPool.schedule(
-                    new TestEventRunnable("testTimer", queue, 10), 1000, TimeUnit.MILLISECONDS);
+                    new TestEventRunnable("testTimer", queue, 10), Duration.ofSeconds(1000));
 
             future.cancel(false);
 
-            Awaitility.await().atLeast(2, TimeUnit.SECONDS);
+            Awaitility.await().atLeast(Duration.ofSeconds(2));
 
             assertTrue(queue.isEmpty());
         } finally {
@@ -253,10 +252,9 @@ public class ThreadPoolTest {
             System.out.println("Scheduling at " + System.currentTimeMillis());
             LinkedBlockingQueue<String> queue = new LinkedBlockingQueue<String>();
             Future<?> future = threadPool.scheduleWithFixedDelay(
-                    new TestEventRunnableFuture("testPeriodicTimer", queue), 250, 500,
-                    TimeUnit.MILLISECONDS);
+                    new TestEventRunnableFuture("testPeriodicTimer", queue), Duration.ofMillis(250), Duration.ofMillis(500));
 
-            MyThread.wait(1, TimeUnit.SECONDS, this);
+            MyThread.wait(Duration.ofSeconds(1), this);
             future.cancel(false);
 
             try {
@@ -292,7 +290,7 @@ public class ThreadPoolTest {
             TestEventRunnableFuture trf = new TestEventRunnableFuture("testPeriodicTimer", queue,
                     1500);
 
-            Future<?> future = threadPool.scheduleAtFixedRate(trf, 0, 2000, TimeUnit.MILLISECONDS);
+            Future<?> future = threadPool.scheduleAtFixedRate(trf, Duration.ZERO, Duration.ofSeconds(2));
 
             Awaitility.await().until(() -> queue.size() >= 5);
 
