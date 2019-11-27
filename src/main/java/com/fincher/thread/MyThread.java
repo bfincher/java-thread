@@ -1,8 +1,6 @@
 package com.fincher.thread;
 
-import java.time.Duration;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
 
 import org.apache.logging.log4j.LogManager;
@@ -159,44 +157,6 @@ public class MyThread extends Thread implements Runnable, MyThreadIfc {
     @Override
     public Optional<MyCallableIfc<?>> getCallable() {
         return userCallable;
-    }
-
-    /**
-     * Wait on the given object until the given time has elapsed
-     * 
-     * @param time     The time to wait
-     * @param timeUnit The wait time unit
-     * @param o        The object to wait on
-     * @throws InterruptedException If the wait is interrupted
-     */
-    public static void wait(long time, TimeUnit timeUnit, final Object o) throws InterruptedException {
-        final int nanosPerMilli = 1000000;
-        long sleepUntil = System.nanoTime() + TimeUnit.NANOSECONDS.convert(time, timeUnit);
-
-        synchronized (o) {
-            long currentNanos = System.nanoTime();
-            
-            while (currentNanos < sleepUntil) {
-                long totalNanosToWait = sleepUntil - currentNanos;
-                long millisToWait = totalNanosToWait / nanosPerMilli;
-                int nanosToWait = (int)(totalNanosToWait - millisToWait * nanosPerMilli);
-                
-                o.wait(millisToWait, nanosToWait);
-                currentNanos = System.nanoTime();
-            }
-        }
-    }
-    
-    
-    /**
-     * Wait on the given object until the given time has elapsed
-     * 
-     * @param duration     The time to wait
-     * @param o        The object to wait on
-     * @throws InterruptedException If the wait is interrupted
-     */
-    public static void wait(Duration duration, final Object o) throws InterruptedException {
-        wait(duration.toNanos(), TimeUnit.NANOSECONDS, o);
     }
 
     private void handleException(Throwable t) {
