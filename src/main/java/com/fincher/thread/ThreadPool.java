@@ -1,7 +1,6 @@
 package com.fincher.thread;
 
 import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.util.concurrent.Callable;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ScheduledFuture;
@@ -11,8 +10,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ThreadPool extends ScheduledThreadPoolExecutor {
-
-    private static final ChronoUnit NANOS = ChronoUnit.NANOS;
 
     private static class ThreadPoolThreadFactory implements ThreadFactory {
         protected static AtomicInteger nextId = new AtomicInteger(1);
@@ -37,22 +34,22 @@ public class ThreadPool extends ScheduledThreadPoolExecutor {
     }
 
     public ScheduledFuture<?> schedule(Runnable command, Duration delay) {
-        return schedule(command, delay.get(NANOS), TimeUnit.NANOSECONDS);
+        return schedule(command, delay.toNanos(), TimeUnit.NANOSECONDS);
     }
 
     public <V> ScheduledFuture<V> schedule(Callable<V> callable, Duration delay) {
-        return schedule(callable, delay.get(NANOS), TimeUnit.NANOSECONDS);
+        return schedule(callable, delay.toNanos(), TimeUnit.NANOSECONDS);
     }
 
     public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, Duration initialDelay,
             Duration period) {
-        return scheduleAtFixedRate(command, initialDelay.get(NANOS), period.get(NANOS),
+        return scheduleAtFixedRate(command, initialDelay.toNanos(), period.toNanos(),
                 TimeUnit.NANOSECONDS);
     }
 
     public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, Duration initialDelay,
             Duration delay) {
-        return scheduleWithFixedDelay(command, initialDelay.get(NANOS), delay.get(NANOS),
+        return scheduleWithFixedDelay(command, initialDelay.toNanos(), delay.toNanos(),
                 TimeUnit.NANOSECONDS);
     }
 

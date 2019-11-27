@@ -252,9 +252,10 @@ public class ThreadPoolTest {
             System.out.println("Scheduling at " + System.currentTimeMillis());
             LinkedBlockingQueue<String> queue = new LinkedBlockingQueue<String>();
             Future<?> future = threadPool.scheduleWithFixedDelay(
-                    new TestEventRunnableFuture("testPeriodicTimer", queue), Duration.ofMillis(250), Duration.ofMillis(500));
+                    new TestEventRunnableFuture("testPeriodicTimer", queue), Duration.ofMillis(250),
+                    Duration.ofMillis(500));
 
-            MyThread.wait(Duration.ofSeconds(1), this);
+            Thread.sleep(1000);
             future.cancel(false);
 
             try {
@@ -277,7 +278,7 @@ public class ThreadPoolTest {
      * 
      * @throws InterruptedException
      */
-    @Test(timeout = 15000)
+    @Test // (timeout = 15000)
     public void testFixedRate() throws InterruptedException {
         System.out.println("Test FixedRate");
 
@@ -290,7 +291,8 @@ public class ThreadPoolTest {
             TestEventRunnableFuture trf = new TestEventRunnableFuture("testPeriodicTimer", queue,
                     1500);
 
-            Future<?> future = threadPool.scheduleAtFixedRate(trf, Duration.ZERO, Duration.ofSeconds(2));
+            Future<?> future = threadPool.scheduleAtFixedRate(trf, Duration.ZERO,
+                    Duration.ofSeconds(2));
 
             Awaitility.await().until(() -> queue.size() >= 5);
 
