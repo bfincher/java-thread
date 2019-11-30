@@ -14,7 +14,7 @@ import org.apache.logging.log4j.Logger;
  * To implement, instantiate this class with a Runnable object.  
  * This Runnable should not contain a indefinite loop,
  * instead, it should have code processing a single iteration of it's task.  
- * <p>
+ *
  * For example:  A traditional Runnable's run method may look like:
  * <code>
  * 
@@ -32,7 +32,7 @@ import org.apache.logging.log4j.Logger;
  *     // some action    
  * }
  * </code>
- * <p>
+ * 
  * 
  * This is because this Class will handle the looping to ensure proper exception 
  * handling and shutdown procedures.
@@ -48,7 +48,7 @@ public class MyThread extends Thread implements Runnable, MyThreadIfc {
 
     private static final Logger LOG = LogManager.getLogger();
 
-    /** Should this thread terminate? */
+    /** Should this thread terminate?.*/
     private volatile boolean terminate = false;
     
     private final Runnable runnable;
@@ -60,7 +60,7 @@ public class MyThread extends Thread implements Runnable, MyThreadIfc {
     private final Optional<MyRunnableIfc> userRunnable;
     private final Optional<MyCallableIfc<?>> userCallable;
 
-    /** Used to notify the user of any exceptions in the thread's body */
+    /** Used to notify the user of any exceptions in the thread's body. */
     private ExceptionHandlerIfc exceptionHandler = null;
 
     /**
@@ -69,7 +69,7 @@ public class MyThread extends Thread implements Runnable, MyThreadIfc {
     private volatile boolean continueAfterException = true;
 
     /**
-     * Constructs a new MyThread
+     * Constructs a new MyThread.
      * 
      * @param name     The name of this thread
      * @param runnable To be invoked upon each thread iteration
@@ -84,10 +84,10 @@ public class MyThread extends Thread implements Runnable, MyThreadIfc {
     }
 
     /**
-     * Constructs a new MyThread
+     * Constructs a new MyThread.
      * 
      * @param name     The name of this thread
-     * @param runnable To be invoked upon each thread iteration
+     * @param callable To be invoked upon each thread iteration
      */
     public MyThread(String name, MyCallableIfc<?> callable) {
         super(name);
@@ -107,19 +107,21 @@ public class MyThread extends Thread implements Runnable, MyThreadIfc {
 
     /**
      * Should execution continue after an exception is encountered. Defaults to true
+     * @param val true if execution should continue after an exception
      */
     public void setContinueAfterException(boolean val) {
         this.continueAfterException = val;
     }
 
     /**
-     * Sets a handler that will be called upon exceptions being thrown in this thread's body
+     * Sets a handler that will be called upon exceptions being thrown in this thread's body.
+     * @param exceptionHandler The exception handler
      */
     public void setExceptionHandler(ExceptionHandlerIfc exceptionHandler) {
         this.exceptionHandler = exceptionHandler;
     }
 
-    /** Should not be called directly */
+    // Should not be called directly
     @Override
     public void run() {
         boolean continueExecution;
@@ -136,7 +138,7 @@ public class MyThread extends Thread implements Runnable, MyThreadIfc {
         LOG.debug("{} terminated", getName());
     }
 
-    /** Terminates this thread */
+    /** Terminates this thread. */
     public void terminate() {
         terminate = true;
         interrupt();
@@ -144,12 +146,16 @@ public class MyThread extends Thread implements Runnable, MyThreadIfc {
         terminateMethod.run();
     }
 
-    /** Has this thread been terminated */
+    /** Has this thread been terminated.
+     * @return true if this thread has terminated
+     */
     public boolean isTerminated() {
         return terminate;
     }
 
-    /** Gets the runnable object associated with this thread */
+    /** Gets the runnable object associated with this thread. 
+     * @return The runnable
+     */
     public Optional<MyRunnableIfc> getRunnable() {
         return userRunnable;
     }

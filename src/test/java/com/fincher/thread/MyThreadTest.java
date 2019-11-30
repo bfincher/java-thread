@@ -9,14 +9,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import org.junit.Assert;
 import org.junit.Test;
 
-/** Tests My Threads */
 public class MyThreadTest {
 
-    /**
-     * Method name is self explanatory
-     * 
-     * @throws InterruptedException
-     */
     @Test
     public void testThreadWithExceptionContinueExecution() throws InterruptedException {
         
@@ -86,11 +80,6 @@ public class MyThreadTest {
         thread.terminate();
     }
 
-    /**
-     * Method name is self explanatory
-     * 
-     * @throws InterruptedException
-     */
     @Test
     public void testThreadWithExceptionStopExecution() throws InterruptedException {
 
