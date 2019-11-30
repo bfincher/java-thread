@@ -105,18 +105,12 @@ public class MyThread extends Thread implements Runnable, MyThreadIfc {
         };
     }
 
-    /**
-     * Should execution continue after an exception is encountered. Defaults to true
-     * @param val true if execution should continue after an exception
-     */
+    @Override
     public void setContinueAfterException(boolean val) {
         this.continueAfterException = val;
     }
 
-    /**
-     * Sets a handler that will be called upon exceptions being thrown in this thread's body.
-     * @param exceptionHandler The exception handler
-     */
+    @Override
     public void setExceptionHandler(ExceptionHandlerIfc exceptionHandler) {
         this.exceptionHandler = exceptionHandler;
     }
@@ -138,7 +132,7 @@ public class MyThread extends Thread implements Runnable, MyThreadIfc {
         LOG.debug("{} terminated", getName());
     }
 
-    /** Terminates this thread. */
+    @Override
     public void terminate() {
         terminate = true;
         interrupt();
@@ -146,16 +140,12 @@ public class MyThread extends Thread implements Runnable, MyThreadIfc {
         terminateMethod.run();
     }
 
-    /** Has this thread been terminated.
-     * @return true if this thread has terminated
-     */
+    @Override
     public boolean isTerminated() {
         return terminate;
     }
 
-    /** Gets the runnable object associated with this thread. 
-     * @return The runnable
-     */
+    @Override
     public Optional<MyRunnableIfc> getRunnable() {
         return userRunnable;
     }
