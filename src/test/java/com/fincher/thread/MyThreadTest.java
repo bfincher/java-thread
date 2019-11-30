@@ -2,23 +2,15 @@ package com.fincher.thread;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
 
 import org.junit.Assert;
 import org.junit.Test;
 
-/** Tests My Threads */
 public class MyThreadTest {
 
-    /**
-     * Method name is self explanatory
-     * 
-     * @throws InterruptedException
-     */
     @Test
     public void testThreadWithExceptionContinueExecution() throws InterruptedException {
         
@@ -88,11 +80,6 @@ public class MyThreadTest {
         thread.terminate();
     }
 
-    /**
-     * Method name is self explanatory
-     * 
-     * @throws InterruptedException
-     */
     @Test
     public void testThreadWithExceptionStopExecution() throws InterruptedException {
 
@@ -139,14 +126,6 @@ public class MyThreadTest {
         }
     }
     
-    @Test
-    public void testWait() throws InterruptedException {
-        long timeStart = System.currentTimeMillis();
-        MyThread.wait(1, TimeUnit.SECONDS, this);
-        long timeStop = System.currentTimeMillis();
-        long delta = timeStop - timeStart;
-        assertTrue("delta = " + delta, delta < 2000);
-    }
 
     @Test
     public void testWithRunnable() throws InterruptedException {
