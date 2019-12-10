@@ -19,7 +19,7 @@ def nexusUrl = System.getenv("NEXUS_URL") ?: "${localNexusUrl}/groups/public"
 
 repositories {
 	 mavenLocal()
-     maven { url "${baseNexusUrl}groups/public" }
+     maven { url "${nexusUrl}" }
 }
 
 dependencies {
