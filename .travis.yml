@@ -2,3 +2,5 @@ language: java
 dist: xenial
 jdk:
         - oraclejdk11
+env:
+        NEXUS_URL="https://repo.maven.apache.org/maven2"
