@@ -14,7 +14,8 @@ description = """Thread Utilities"""
 sourceCompatibility = 1.11
 targetCompatibility = 1.11
 
-def baseNexusUrl = "http://192.168.1.2:8082/nexus/content/"
+def localNexusUrl = "http://192.168.1.2:8082/nexus/content/"
+def nexusUrl = System.getenv("NEXUS_URL") ?: "${localNexusUrl}/groups/public"
 
 repositories {
 	 mavenLocal()
@@ -50,9 +51,9 @@ publishing {
             }
 		
 	        if (project.version.endsWith('-SNAPSHOT')) {
-	            url "${baseNexusUrl}repositories/snapshots"
+	            url "${localNexusUrl}repositories/snapshots"
 	        } else {
-	            url "${baseNexusUrl}repositories/releases"
+	            url "${localNexusUrl}repositories/releases"
 	        }
             authentication {
                 basic(BasicAuthentication)
