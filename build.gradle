@@ -17,7 +17,7 @@ description = """Thread Utilities"""
 sourceCompatibility = 1.11
 targetCompatibility = 1.11
 
-def baseNexusUrl = "http://192.168.1.2:8082/nexus/content/"
+def baseNexusUrl = "http://nexus:8081/nexus/content/"
 
 repositories {
      maven { url "${baseNexusUrl}groups/public" }
