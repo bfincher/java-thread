@@ -2,7 +2,7 @@ package com.fincher.thread;
 
 import java.util.Optional;
 
-/** A Thread abstraction */
+/** A Thread abstraction. */
 public interface MyThreadIfc {
 
     /**
@@ -12,37 +12,38 @@ public interface MyThreadIfc {
      */
     public void setContinueAfterException(boolean val);
 
-    /** Terminates this thread */
+    /** Terminates this thread. */
     public void terminate();
 
     /**
-     * Has this thread been terminated
+     * Has this thread been terminated.
      * 
      * @return true if terminated
      */
     public boolean isTerminated();
 
     /**
-     * Gets the ID of this thread
+     * Gets the ID of this thread.
      * 
      * @return The name of this thread
      */
     public String getName();
 
     /**
-     * Sets a handler that will be called upon exceptions being thrown in this thread's body
+     * Sets a handler that will be called upon exceptions being thrown in this thread's body.
      * 
      * @param exceptionHandler The exception handler
      */
     public void setExceptionHandler(ExceptionHandlerIfc exceptionHandler);
 
-    /** See {@link Thread#start} */
+    /** 
+     * See {@link Thread#start}. */
     public void start();
 
     /**
      * Waits for this thread to die.
      * 
-     * @throws InterruptedException
+     * @throws InterruptedException if the thread is interrupted
      */
     public void join() throws InterruptedException;
 
@@ -51,12 +52,12 @@ public interface MyThreadIfc {
      * forever.
      * 
      * @param millis The amount of time to wait for the thread to terminate before returning
-     * @throws InterruptedException
+     * @throws InterruptedException If the thread is interrupted
      */
     public void join(long millis) throws InterruptedException;
 
     /**
-     * Gets the runnable object associated with this thread
+     * Gets the runnable object associated with this thread.
      * 
      * @return The runnable object associated with this thread
      */
@@ -64,7 +65,7 @@ public interface MyThreadIfc {
     
     
     /**
-     * Gets the callable object associated with this thread
+     * Gets the callable object associated with this thread.
      * 
      * @return The callable object associated with this thread
      */

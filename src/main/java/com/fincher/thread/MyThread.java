@@ -1,7 +1,6 @@
 package com.fincher.thread;
 
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
 
 import org.apache.logging.log4j.LogManager;
@@ -15,7 +14,7 @@ import org.apache.logging.log4j.Logger;
  * To implement, instantiate this class with a Runnable object.  
  * This Runnable should not contain a indefinite loop,
  * instead, it should have code processing a single iteration of it's task.  
- * <p>
+ *
  * For example:  A traditional Runnable's run method may look like:
  * <code>
  * 
@@ -33,7 +32,7 @@ import org.apache.logging.log4j.Logger;
  *     // some action    
  * }
  * </code>
- * <p>
+ * 
  * 
  * This is because this Class will handle the looping to ensure proper exception 
  * handling and shutdown procedures.
@@ -49,7 +48,7 @@ public class MyThread extends Thread implements Runnable, MyThreadIfc {
 
     private static final Logger LOG = LogManager.getLogger();
 
-    /** Should this thread terminate? */
+    /** Should this thread terminate?.*/
     private volatile boolean terminate = false;
     
     private final Runnable runnable;
@@ -61,7 +60,7 @@ public class MyThread extends Thread implements Runnable, MyThreadIfc {
     private final Optional<MyRunnableIfc> userRunnable;
     private final Optional<MyCallableIfc<?>> userCallable;
 
-    /** Used to notify the user of any exceptions in the thread's body */
+    /** Used to notify the user of any exceptions in the thread's body. */
     private ExceptionHandlerIfc exceptionHandler = null;
 
     /**
@@ -70,7 +69,7 @@ public class MyThread extends Thread implements Runnable, MyThreadIfc {
     private volatile boolean continueAfterException = true;
 
     /**
-     * Constructs a new MyThread
+     * Constructs a new MyThread.
      * 
      * @param name     The name of this thread
      * @param runnable To be invoked upon each thread iteration
@@ -85,10 +84,10 @@ public class MyThread extends Thread implements Runnable, MyThreadIfc {
     }
 
     /**
-     * Constructs a new MyThread
+     * Constructs a new MyThread.
      * 
      * @param name     The name of this thread
-     * @param runnable To be invoked upon each thread iteration
+     * @param callable To be invoked upon each thread iteration
      */
     public MyThread(String name, MyCallableIfc<?> callable) {
         super(name);
@@ -106,21 +105,17 @@ public class MyThread extends Thread implements Runnable, MyThreadIfc {
         };
     }
 
-    /**
-     * Should execution continue after an exception is encountered. Defaults to true
-     */
+    @Override
     public void setContinueAfterException(boolean val) {
         this.continueAfterException = val;
     }
 
-    /**
-     * Sets a handler that will be called upon exceptions being thrown in this thread's body
-     */
+    @Override
     public void setExceptionHandler(ExceptionHandlerIfc exceptionHandler) {
         this.exceptionHandler = exceptionHandler;
     }
 
-    /** Should not be called directly */
+    // Should not be called directly
     @Override
     public void run() {
         boolean continueExecution;
@@ -137,7 +132,7 @@ public class MyThread extends Thread implements Runnable, MyThreadIfc {
         LOG.debug("{} terminated", getName());
     }
 
-    /** Terminates this thread */
+    @Override
     public void terminate() {
         terminate = true;
         interrupt();
@@ -145,12 +140,12 @@ public class MyThread extends Thread implements Runnable, MyThreadIfc {
         terminateMethod.run();
     }
 
-    /** Has this thread been terminated */
+    @Override
     public boolean isTerminated() {
         return terminate;
     }
 
-    /** Gets the runnable object associated with this thread */
+    @Override
     public Optional<MyRunnableIfc> getRunnable() {
         return userRunnable;
     }
@@ -158,32 +153,6 @@ public class MyThread extends Thread implements Runnable, MyThreadIfc {
     @Override
     public Optional<MyCallableIfc<?>> getCallable() {
         return userCallable;
-    }
-
-    /**
-     * Wait on the given object until the given time has elapsed
-     * 
-     * @param time     The time to wait
-     * @param timeUnit The wait time unit
-     * @param o        The object to wait on
-     * @throws InterruptedException If the wait is interrupted
-     */
-    public static void wait(long time, TimeUnit timeUnit, final Object o) throws InterruptedException {
-        final int nanosPerMilli = 1000000;
-        long sleepUntil = System.nanoTime() + TimeUnit.NANOSECONDS.convert(time, timeUnit);
-
-        synchronized (o) {
-            long currentNanos = System.nanoTime();
-            
-            while (currentNanos < sleepUntil) {
-                long totalNanosToWait = sleepUntil - currentNanos;
-                long millisToWait = totalNanosToWait / nanosPerMilli;
-                int nanosToWait = (int)(totalNanosToWait - millisToWait * nanosPerMilli);
-                
-                o.wait(millisToWait, nanosToWait);
-                currentNanos = System.nanoTime();
-            }
-        }
     }
 
     private void handleException(Throwable t) {

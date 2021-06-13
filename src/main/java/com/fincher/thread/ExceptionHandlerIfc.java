@@ -1,10 +1,10 @@
 package com.fincher.thread;
 
-/** An object that can handle exceptions thrown by Threads */
+/** An object that can handle exceptions thrown by Threads. */
 public interface ExceptionHandlerIfc {
 
     /**
-     * Used to notify that an Exception occurred
+     * Used to notify that an Exception occurred.
      * 
      * @param t The exception that occurred
      */

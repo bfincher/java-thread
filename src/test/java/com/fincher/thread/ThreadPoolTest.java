@@ -12,13 +12,11 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
 import org.awaitility.Awaitility;
 import org.junit.Assert;
 import org.junit.Test;
 
-/** A JUnit tester for the thread pool */
 public class ThreadPoolTest {
 
     private static class TestRunnable implements RunnableWithIdIfc {
@@ -82,6 +80,37 @@ public class ThreadPoolTest {
                 queue.add(str);
             }
 
+        }
+    }
+    
+    
+    private static class TestEventCallable implements CallableWithIdIfc<Boolean> {
+
+        private String id;
+
+        private final BlockingQueue<String> queue;
+
+        private final int numIterations;
+
+        public TestEventCallable(String id, BlockingQueue<String> queue, int numIterations) {
+            this.queue = queue;
+            this.id = id;
+            this.numIterations = numIterations;
+        }
+
+        @Override
+        public String getId() {
+            return id;
+        }
+
+        @Override
+        public Boolean call() {
+            for (int i = 0; i < numIterations; i++) {
+                String str = id + " iteration " + i;
+                System.out.println(str);
+                queue.add(str);
+            }
+            return Boolean.TRUE;
         }
     }
 
@@ -152,33 +181,18 @@ public class ThreadPoolTest {
         threadPool.shutdown();
     }
 
-    /**
-     * Method name is self explanatory
-     * 
-     * @throws InterruptedException
-     */
     @Test
     public void testOneThread() throws InterruptedException {
         System.out.println("Testing with one thread");
         runTestWithXThreads(1);
     }
 
-    /**
-     * Method name is self explanatory
-     * 
-     * @throws InterruptedException
-     */
     @Test
     public void testTwoThread() throws InterruptedException {
         System.out.println("Testing with two threads");
         runTestWithXThreads(2);
     }
 
-    /**
-     * Method name is self explanatory
-     * 
-     * @throws InterruptedException
-     */
     @Test(timeout = 5000)
     public void testTimer() throws InterruptedException {
         ThreadPool threadPool = null;
@@ -190,7 +204,7 @@ public class ThreadPoolTest {
 
             BlockingQueue<String> queue = new LinkedBlockingQueue<String>();
             ScheduledFuture<?> future = threadPool.schedule(
-                    new TestEventRunnable("testTimer", queue, 10), 500, TimeUnit.MILLISECONDS);
+                    new TestEventRunnable("testTimer", queue, 10), Duration.ofMillis(500));
 
             try {
                 System.out.println(future.get());
@@ -210,11 +224,6 @@ public class ThreadPoolTest {
         }
     }
 
-    /**
-     * Test a timer that is cancelled before it is executed
-     * 
-     * @throws InterruptedException
-     */
     @Test
     public void testCancelTimer() throws InterruptedException {
         System.out.println("testCancelTimer");
@@ -225,11 +234,11 @@ public class ThreadPoolTest {
 
             BlockingQueue<String> queue = new LinkedBlockingQueue<String>();
             ScheduledFuture<?> future = threadPool.schedule(
-                    new TestEventRunnable("testTimer", queue, 10), 1000, TimeUnit.MILLISECONDS);
+                    new TestEventCallable("testTimer", queue, 10), Duration.ofSeconds(1000));
 
             future.cancel(false);
 
-            Awaitility.await().atLeast(2, TimeUnit.SECONDS);
+            Awaitility.await().atLeast(Duration.ofSeconds(2));
 
             assertTrue(queue.isEmpty());
         } finally {
@@ -237,11 +246,6 @@ public class ThreadPoolTest {
         }
     }
 
-    /**
-     * Method name is self explanatory
-     * 
-     * @throws InterruptedException
-     */
     @Test
     public void testFixedDelay() throws InterruptedException {
         ThreadPool threadPool = null;
@@ -253,10 +257,10 @@ public class ThreadPoolTest {
             System.out.println("Scheduling at " + System.currentTimeMillis());
             LinkedBlockingQueue<String> queue = new LinkedBlockingQueue<String>();
             Future<?> future = threadPool.scheduleWithFixedDelay(
-                    new TestEventRunnableFuture("testPeriodicTimer", queue), 250, 500,
-                    TimeUnit.MILLISECONDS);
+                    new TestEventRunnableFuture("testPeriodicTimer", queue), Duration.ofMillis(250),
+                    Duration.ofMillis(500));
 
-            MyThread.wait(1, TimeUnit.SECONDS, this);
+            Thread.sleep(1000);
             future.cancel(false);
 
             try {
@@ -274,12 +278,7 @@ public class ThreadPoolTest {
         }
     }
 
-    /**
-     * Method name is self explanatory
-     * 
-     * @throws InterruptedException
-     */
-    @Test(timeout = 15000)
+    @Test // (timeout = 15000)
     public void testFixedRate() throws InterruptedException {
         System.out.println("Test FixedRate");
 
@@ -292,7 +291,8 @@ public class ThreadPoolTest {
             TestEventRunnableFuture trf = new TestEventRunnableFuture("testPeriodicTimer", queue,
                     1500);
 
-            Future<?> future = threadPool.scheduleAtFixedRate(trf, 0, 2000, TimeUnit.MILLISECONDS);
+            Future<?> future = threadPool.scheduleAtFixedRate(trf, Duration.ZERO,
+                    Duration.ofSeconds(2));
 
             Awaitility.await().until(() -> queue.size() >= 5);
 
@@ -311,5 +311,12 @@ public class ThreadPoolTest {
         } finally {
             threadPool.shutdown();
         }
+    }
+    
+    @Test(expected = UnsupportedOperationException.class)
+    public void testSetThreadFactory() {
+        ThreadPool threadPool = new ThreadPool(1, (r, e) ->  {});
+        
+        threadPool.setThreadFactory(null);
     }
 }

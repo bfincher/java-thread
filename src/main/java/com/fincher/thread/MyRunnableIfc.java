@@ -2,7 +2,7 @@ package com.fincher.thread;
 
 /**
  * An extension of Runnable that supplies a method to determine if this Runnable should continue to
- * be executed
+ * be executed.
  * 
  * @author Brian Fincher
  *
@@ -10,7 +10,7 @@ package com.fincher.thread;
 public interface MyRunnableIfc extends Runnable {
 
     /**
-     * Should this Runnable continue to be executed
+     * Should this Runnable continue to be executed.
      * 
      * @return True if execution should continue for another iteration
      */

@@ -1,11 +1,11 @@
 package com.fincher.thread;
 
-/** An interface used to enforce identifiers */
+/** An interface used to enforce identifiers. */
 
 public interface IdentifiableIfc {
 
     /**
-     * The identifier of this object
+     * The identifier of this object.
      * 
      * @return The identifier of this object
      */
