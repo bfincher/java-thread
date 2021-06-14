@@ -48,7 +48,7 @@ publishing {
         maven {
 	        credentials {
 	            username = "${publishUsername}"
-		        password = "${publishPassword}"
+		    password = "${publishPassword}"
             }
 		
 	        if (project.version.endsWith('-SNAPSHOT')) {

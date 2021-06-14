@@ -41,20 +41,6 @@ pipeline {
 			}
 		}
 
-		stage('Sonarqube') {
-			when { expression { params.runSonarqube }}
-
-		    steps {
-			sh """
-		     ./gradlew sonarqube \
-			-Dsonar.projectKey=java-thread \
-		  	-Dsonar.host.url=http://192.168.1.2:9000 \
-			-Dsonar.login=c52f06414e05db27d93a294d7ee60c601d2675b0 \
-			$gradleOpts
-			"""
-		    }
-		}
-
 		stage('Release') {
 		    when { expression { performRelease } }
 		    steps {
@@ -71,10 +57,11 @@ pipeline {
 		stage('Sonarqube') {
 		    steps {
 			sh """
-		        gradle sonarqube \
+		        ./gradlew sonarqube \
 			-Dsonar.projectKey=java-thread \
-		  	-Dsonar.host.url=http://192.168.1.2:9000 \
-			-Dsonar.login=c52f06414e05db27d93a294d7ee60c601d2675b0
+		  	-Dsonar.host.url=http://sonarqube:9000 \
+			-Dsonar.login=7afd7c7c928867ca548ea2324cff59e492e50266 \
+                        gradleOpts
 			"""
 		    }
 		}
