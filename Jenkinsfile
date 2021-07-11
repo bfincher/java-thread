@@ -27,7 +27,7 @@ pipeline {
 		        ./gradlew sonarqube \
 			-Dsonar.projectKey=java-thread \
 		  	-Dsonar.host.url=http://sonarqube:9000 \
-                        -Dsonar.login=227a800ab5d6ea59657d22e7880f6e355f96b3c1
+                        -Dsonar.login=3ae1d2fcd4be3b3081d66f33b74cf9298279c721
 			"""
 		    }
 		}
