@@ -39,7 +39,6 @@ task sourcesJar(type: Jar) {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-<<<<<<< HEAD
 	        from components.java
 	        artifact tasks.sourcesJar
 	    }
