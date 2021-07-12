@@ -183,9 +183,9 @@
     <module name="JavadocMethod">
       <property name="allowedAnnotations" value="Override, Test"/>
       <property name="scope" value="public"/>
-      <property name="allowThrowsTagsForSubclasses" value="true"/>
+	      <!--<property name="allowThrowsTagsForSubclasses" value="true"/> -->
       <property name="allowMissingParamTags" value="true"/>
-      <property name="allowMissingThrowsTags" value="true"/>
+	      <!-- <property name="allowMissingThrowsTags" value="true"/> -->
       <property name="allowMissingReturnTag" value="true"/>
     </module>
     <module name="MissingJavadocMethod">
