@@ -12,6 +12,10 @@
   <property name="severity" value="warning"/>
   <property name="charset" value="UTF-8"/>
   <property name="fileExtensions" value="java, properties, xml"/>
+  <module name="LineLength">
+    <property name="ignorePattern" value="^package.*|^import.*|a href|href|http://|https://|ftp://"/>
+    <property name="max" value="120"/>
+  </module>
   <module name="TreeWalker">
     <module name="OuterTypeFilename"/>
     <module name="IllegalTokenText">
@@ -179,9 +183,9 @@
     <module name="JavadocMethod">
       <property name="allowedAnnotations" value="Override, Test"/>
       <property name="scope" value="public"/>
-      <property name="allowThrowsTagsForSubclasses" value="true"/>
+	      <!--<property name="allowThrowsTagsForSubclasses" value="true"/> -->
       <property name="allowMissingParamTags" value="true"/>
-      <property name="allowMissingThrowsTags" value="true"/>
+	      <!-- <property name="allowMissingThrowsTags" value="true"/> -->
       <property name="allowMissingReturnTag" value="true"/>
     </module>
     <module name="MissingJavadocMethod">
