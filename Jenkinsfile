@@ -43,7 +43,6 @@ pipeline {
             }
         }
 
-<<<<<<< HEAD
         stage('Sonarqube') {
             when { expression { params.runSonarqube }}
 
