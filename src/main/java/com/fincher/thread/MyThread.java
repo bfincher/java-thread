@@ -3,8 +3,8 @@ package com.fincher.thread;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <pre>
@@ -46,126 +46,126 @@ import org.apache.logging.log4j.Logger;
  */
 public class MyThread extends Thread implements Runnable, MyThreadIfc {
 
-    private static final Logger LOG = LogManager.getLogger();
+	private static final Logger LOG = LoggerFactory.getLogger(MyThread.class);
 
-    /** Should this thread terminate?.*/
-    private volatile boolean terminate = false;
-    
-    private final Runnable runnable;
-    
-    private final BooleanSupplier continueExecutionMethod;
-    
-    private final Runnable terminateMethod;
-    
-    private final Optional<MyRunnableIfc> userRunnable;
-    private final Optional<MyCallableIfc<?>> userCallable;
+	/** Should this thread terminate?. */
+	private volatile boolean terminate = false;
 
-    /** Used to notify the user of any exceptions in the thread's body. */
-    private ExceptionHandlerIfc exceptionHandler = null;
+	private final Runnable runnable;
 
-    /**
-     * Should execution continue after an exception is encountered. Defaults to true
-     */
-    private volatile boolean continueAfterException = true;
+	private final BooleanSupplier continueExecutionMethod;
 
-    /**
-     * Constructs a new MyThread.
-     * 
-     * @param name     The name of this thread
-     * @param runnable To be invoked upon each thread iteration
-     */
-    public MyThread(String name, MyRunnableIfc runnable) {
-        super(name);
-        userRunnable = Optional.of(runnable);
-        userCallable = Optional.empty();
-        this.runnable = runnable;
-        terminateMethod = runnable::terminate;
-        continueExecutionMethod = runnable::continueExecution;
-    }
+	private final Runnable terminateMethod;
 
-    /**
-     * Constructs a new MyThread.
-     * 
-     * @param name     The name of this thread
-     * @param callable To be invoked upon each thread iteration
-     */
-    public MyThread(String name, MyCallableIfc<?> callable) {
-        super(name);
-        userCallable = Optional.of(callable);
-        userRunnable = Optional.empty();
-        continueExecutionMethod = callable::continueExecution;
-        terminateMethod = callable::terminate;
-        
-        runnable = () -> {
-            try {
-                callable.call();
-            } catch (Exception e) {
-                handleException(e);
-            }
-        };
-    }
+	private final Optional<MyRunnableIfc> userRunnable;
+	private final Optional<MyCallableIfc<?>> userCallable;
 
-    @Override
-    public void setContinueAfterException(boolean val) {
-        this.continueAfterException = val;
-    }
+	/** Used to notify the user of any exceptions in the thread's body. */
+	private ExceptionHandlerIfc exceptionHandler = null;
 
-    @Override
-    public void setExceptionHandler(ExceptionHandlerIfc exceptionHandler) {
-        this.exceptionHandler = exceptionHandler;
-    }
+	/**
+	 * Should execution continue after an exception is encountered. Defaults to true
+	 */
+	private volatile boolean continueAfterException = true;
 
-    // Should not be called directly
-    @Override
-    public void run() {
-        boolean continueExecution;
-        do {
-            try {
-                runnable.run();
-            } catch (Throwable t) {
-                handleException(t);
-            }
+	/**
+	 * Constructs a new MyThread.
+	 * 
+	 * @param name     The name of this thread
+	 * @param runnable To be invoked upon each thread iteration
+	 */
+	public MyThread(String name, MyRunnableIfc runnable) {
+		super(name);
+		userRunnable = Optional.of(runnable);
+		userCallable = Optional.empty();
+		this.runnable = runnable;
+		terminateMethod = runnable::terminate;
+		continueExecutionMethod = runnable::continueExecution;
+	}
 
-            continueExecution = continueExecutionMethod.getAsBoolean();
-        } while (!terminate && continueExecution);
+	/**
+	 * Constructs a new MyThread.
+	 * 
+	 * @param name     The name of this thread
+	 * @param callable To be invoked upon each thread iteration
+	 */
+	public MyThread(String name, MyCallableIfc<?> callable) {
+		super(name);
+		userCallable = Optional.of(callable);
+		userRunnable = Optional.empty();
+		continueExecutionMethod = callable::continueExecution;
+		terminateMethod = callable::terminate;
 
-        LOG.debug("{} terminated", getName());
-    }
+		runnable = () -> {
+			try {
+				callable.call();
+			} catch (Exception e) {
+				handleException(e);
+			}
+		};
+	}
 
-    @Override
-    public void terminate() {
-        terminate = true;
-        interrupt();
+	@Override
+	public void setContinueAfterException(boolean val) {
+		this.continueAfterException = val;
+	}
 
-        terminateMethod.run();
-    }
+	@Override
+	public void setExceptionHandler(ExceptionHandlerIfc exceptionHandler) {
+		this.exceptionHandler = exceptionHandler;
+	}
 
-    @Override
-    public boolean isTerminated() {
-        return terminate;
-    }
+	// Should not be called directly
+	@Override
+	public void run() {
+		boolean continueExecution;
+		do {
+			try {
+				runnable.run();
+			} catch (Throwable t) {
+				handleException(t);
+			}
 
-    @Override
-    public Optional<MyRunnableIfc> getRunnable() {
-        return userRunnable;
-    }
+			continueExecution = continueExecutionMethod.getAsBoolean();
+		} while (!terminate && continueExecution);
 
-    @Override
-    public Optional<MyCallableIfc<?>> getCallable() {
-        return userCallable;
-    }
+		LOG.debug("{} terminated", getName());
+	}
 
-    private void handleException(Throwable t) {
-        if (exceptionHandler == null) {
-            LOG.error(getName() + " " + t.getMessage(), t);
-        } else {
-            exceptionHandler.onException(t);
-        }
+	@Override
+	public void terminate() {
+		terminate = true;
+		interrupt();
 
-        if (!continueAfterException) {
-            LOG.error("{} Execution terminating due to exception", getName());
-            terminate = true;
-        }
-    }
+		terminateMethod.run();
+	}
+
+	@Override
+	public boolean isTerminated() {
+		return terminate;
+	}
+
+	@Override
+	public Optional<MyRunnableIfc> getRunnable() {
+		return userRunnable;
+	}
+
+	@Override
+	public Optional<MyCallableIfc<?>> getCallable() {
+		return userCallable;
+	}
+
+	private void handleException(Throwable t) {
+		if (exceptionHandler == null) {
+			LOG.error(getName() + " " + t.getMessage(), t);
+		} else {
+			exceptionHandler.onException(t);
+		}
+
+		if (!continueAfterException) {
+			LOG.error("{} Execution terminating due to exception", getName());
+			terminate = true;
+		}
+	}
 
 }
