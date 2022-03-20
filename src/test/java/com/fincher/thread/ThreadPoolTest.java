@@ -1,6 +1,5 @@
 package com.fincher.thread;
 
-import static junit.framework.Assert.fail;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -82,8 +81,7 @@ public class ThreadPoolTest {
 
         }
     }
-    
-    
+
     private static class TestEventCallable implements CallableWithIdIfc<Boolean> {
 
         private String id;
@@ -155,8 +153,7 @@ public class ThreadPoolTest {
         int numSubmissions = numThreads * 2;
 
         ArrayList<Future<?>> futures = new ArrayList<Future<?>>(numSubmissions);
-        ArrayList<BlockingQueue<String>> queueList = new ArrayList<BlockingQueue<String>>(
-                numSubmissions);
+        ArrayList<BlockingQueue<String>> queueList = new ArrayList<BlockingQueue<String>>(numSubmissions);
 
         for (int i = 0; i < numThreads * 2; i++) {
             LinkedBlockingQueue<String> queue = new LinkedBlockingQueue<String>();
@@ -174,9 +171,7 @@ public class ThreadPoolTest {
         }
 
         for (BlockingQueue<String> queue : queueList) {
-            if (queue.size() != TestRunnable.NUM_ITERATIONS) {
-                Assert.fail("size = " + queue.size());
-            }
+            assertEquals(TestRunnable.NUM_ITERATIONS, queue.size());
         }
         threadPool.shutdown();
     }
@@ -194,7 +189,7 @@ public class ThreadPoolTest {
     }
 
     @Test(timeout = 5000)
-    public void testTimer() throws InterruptedException {
+    public void testTimer() throws InterruptedException, ExecutionException {
         ThreadPool threadPool = null;
         try {
             threadPool = new ThreadPool(10);
@@ -203,15 +198,10 @@ public class ThreadPoolTest {
             System.out.println("Scheduling...");
 
             BlockingQueue<String> queue = new LinkedBlockingQueue<String>();
-            ScheduledFuture<?> future = threadPool.schedule(
-                    new TestEventRunnable("testTimer", queue, 10), Duration.ofMillis(500));
+            ScheduledFuture<?> future = threadPool.schedule(new TestEventRunnable("testTimer", queue, 10),
+                    Duration.ofMillis(500));
 
-            try {
-                System.out.println(future.get());
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-                fail(e.getMessage());
-            }
+            System.out.println(future.get());
 
             Awaitility.await().until(() -> queue.size() == 10);
 
@@ -233,8 +223,8 @@ public class ThreadPoolTest {
             threadPool = new ThreadPool(10);
 
             BlockingQueue<String> queue = new LinkedBlockingQueue<String>();
-            ScheduledFuture<?> future = threadPool.schedule(
-                    new TestEventCallable("testTimer", queue, 10), Duration.ofSeconds(1000));
+            ScheduledFuture<?> future = threadPool.schedule(new TestEventCallable("testTimer", queue, 10),
+                    Duration.ofSeconds(1000));
 
             future.cancel(false);
 
@@ -247,7 +237,7 @@ public class ThreadPoolTest {
     }
 
     @Test
-    public void testFixedDelay() throws InterruptedException {
+    public void testFixedDelay() throws InterruptedException, ExecutionException {
         ThreadPool threadPool = null;
         try {
             threadPool = new ThreadPool(10);
@@ -267,9 +257,6 @@ public class ThreadPoolTest {
                 future.get();
             } catch (CancellationException ce) {
                 // this is expected
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-                fail(e.getMessage());
             }
 
             assertEquals(2, queue.size());
@@ -279,7 +266,7 @@ public class ThreadPoolTest {
     }
 
     @Test // (timeout = 15000)
-    public void testFixedRate() throws InterruptedException {
+    public void testFixedRate() throws InterruptedException, ExecutionException {
         System.out.println("Test FixedRate");
 
         ThreadPool threadPool = null;
@@ -288,11 +275,9 @@ public class ThreadPoolTest {
 
             LinkedBlockingQueue<String> queue = new LinkedBlockingQueue<String>();
 
-            TestEventRunnableFuture trf = new TestEventRunnableFuture("testPeriodicTimer", queue,
-                    1500);
+            TestEventRunnableFuture trf = new TestEventRunnableFuture("testPeriodicTimer", queue, 1500);
 
-            Future<?> future = threadPool.scheduleAtFixedRate(trf, Duration.ZERO,
-                    Duration.ofSeconds(2));
+            Future<?> future = threadPool.scheduleAtFixedRate(trf, Duration.ZERO, Duration.ofSeconds(2));
 
             Awaitility.await().until(() -> queue.size() >= 5);
 
@@ -302,9 +287,6 @@ public class ThreadPoolTest {
                 future.get();
             } catch (CancellationException ce) {
                 // this is expected
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-                fail(e.getMessage());
             }
 
             assertEquals(5, queue.size());
@@ -312,11 +294,12 @@ public class ThreadPoolTest {
             threadPool.shutdown();
         }
     }
-    
+
     @Test(expected = UnsupportedOperationException.class)
     public void testSetThreadFactory() {
-        ThreadPool threadPool = new ThreadPool(1, (r, e) ->  {});
-        
+        ThreadPool threadPool = new ThreadPool(1, (r, e) -> {
+        });
+
         threadPool.setThreadFactory(null);
     }
 }

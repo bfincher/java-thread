@@ -1,31 +1,55 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        if (project.hasProperty('localNexus')) {
+            maven {
+                url "${localNexus}"
+                allowInsecureProtocol = true
+            }
+        } else {
+            mavenCentral()
+        }
+    }
+
+    dependencies {
+        classpath 'fincher.java.eclipse:fincher.java.eclipse.gradle.plugin:0.0.3'
+        classpath 'fincher.java.checkstyle:fincher.java.checkstyle.gradle.plugin:0.0.1'
+    }
+}
+
 plugins {
     id "java"
     id "maven-publish"
-    id "checkstyle"
     id "jacoco"
     id "net.researchgate.release" version "2.6.0"
     id "org.sonarqube" version "3.0"
 }
 
+apply plugin: com.fincher.gradle.eclipse.EclipseSettings
+apply plugin: com.fincher.gradle.checkstyle.CheckstyleConfigPlugin
+
 group = 'com.fincher'
 
 description = """Thread Utilities"""
 
-sourceCompatibility = 1.11
-targetCompatibility = 1.11
+sourceCompatibility = 1.17
+targetCompatibility = 1.17
 
 repositories {
     mavenLocal()
     if (project.hasProperty('localNexus')) {
-        maven { url "${localNexus}" }
+        maven {
+          url "${localNexus}" 
+          allowInsecureProtocol = true
+        }
     } else {
         mavenCentral()
     }
 }
 
 dependencies {
-    implementation 'org.slf4j:slf4j-api:1.7.2'
-    implementation 'com.google.guava:guava:29.0-jre'
+    implementation 'org.apache.logging.log4j:log4j-slf4j-impl:2.17.2'
+    implementation 'com.google.guava:guava:31.1-jre'
     testImplementation 'junit:junit:4.13.1'
     testImplementation 'org.awaitility:awaitility:4.0.1'
 }
@@ -55,6 +79,7 @@ publishing {
 	        } else {
 	            url "${publishReleaseUrl}"
 	        }
+            allowInsecureProtocol = true
             authentication {
                 basic(BasicAuthentication)
             }
@@ -62,8 +87,10 @@ publishing {
     }
 }
 
+tasks.checkstyleMain.dependsOn("copyCheckstyleConfig")
+
 checkstyle {
-    configFile file("config/checkstyle/checkstyle.xml")
+    configDirectory = "${buildDir}/generated/checkstyleConfig" as File
 }
 
 release {
