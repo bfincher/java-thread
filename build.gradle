@@ -12,7 +12,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'fincher.java.eclipse:fincher.java.eclipse.gradle.plugin:0.0.3'
+        classpath 'fincher.java.eclipse:fincher.java.eclipse.gradle.plugin:0.0.4'
         classpath 'fincher.java.checkstyle:fincher.java.checkstyle.gradle.plugin:0.0.1'
     }
 }
