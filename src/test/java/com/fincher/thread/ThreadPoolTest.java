@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -18,7 +19,7 @@ import org.junit.Test;
 
 public class ThreadPoolTest {
 
-    private static class TestRunnable implements RunnableWithIdIfc {
+    private static class TestRunnable implements Runnable {
 
         public static final int NUM_ITERATIONS = 10;
 
@@ -29,11 +30,6 @@ public class ThreadPoolTest {
         public TestRunnable(String id, BlockingQueue<String> queue) {
             this.queue = queue;
             this.id = id;
-        }
-
-        @Override
-        public String getId() {
-            return id;
         }
 
         @Override
@@ -52,7 +48,7 @@ public class ThreadPoolTest {
         }
     }
 
-    private static class TestEventRunnable implements RunnableWithIdIfc {
+    private static class TestEventRunnable implements Runnable {
 
         private String id;
 
@@ -67,11 +63,6 @@ public class ThreadPoolTest {
         }
 
         @Override
-        public String getId() {
-            return id;
-        }
-
-        @Override
         public void run() {
             for (int i = 0; i < numIterations; i++) {
                 String str = id + " iteration " + i;
@@ -82,7 +73,7 @@ public class ThreadPoolTest {
         }
     }
 
-    private static class TestEventCallable implements CallableWithIdIfc<Boolean> {
+    private static class TestEventCallable implements Callable<Boolean> {
 
         private String id;
 
@@ -97,11 +88,6 @@ public class ThreadPoolTest {
         }
 
         @Override
-        public String getId() {
-            return id;
-        }
-
-        @Override
         public Boolean call() {
             for (int i = 0; i < numIterations; i++) {
                 String str = id + " iteration " + i;
@@ -112,7 +98,7 @@ public class ThreadPoolTest {
         }
     }
 
-    private static class TestEventRunnableFuture implements RunnableWithIdIfc {
+    private static class TestEventRunnableFuture implements Runnable {
 
         private String id;
 
@@ -130,11 +116,6 @@ public class ThreadPoolTest {
             this.id = id;
             this.queue = queue;
             this.sleepTime = sleepTime;
-        }
-
-        @Override
-        public String getId() {
-            return id;
         }
 
         @Override

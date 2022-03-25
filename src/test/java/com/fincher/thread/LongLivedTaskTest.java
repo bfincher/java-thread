@@ -2,19 +2,24 @@ package com.fincher.thread;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
-import org.junit.Assert;
 import org.junit.Test;
 
-public class MyThreadTest {
+public class LongLivedTaskTest {
 
     @Test
-    public void testThreadWithExceptionContinueExecution() throws InterruptedException {
+    public void testThreadWithExceptionContinueExecutionWithRunnable() throws InterruptedException {
         
-        MyRunnableIfc runnable = new MyRunnableIfc() {
+        RunnableTask runnable = new RunnableTask() {
             @Override
             public void run() {
                 try {
@@ -38,15 +43,17 @@ public class MyThreadTest {
          
         };
         
-        MyThreadIfc thread = new MyThread("TestThread", runnable);
-        assertEquals(runnable, thread.getRunnable().get());
-        thread.start();
+        LongLivedTask<Void> task = LongLivedTask.create("TestThread", runnable);
+        Future<Void> future = task.start();
         Thread.sleep(2000);
-        assertFalse("Thread did not continue after Exception", thread.isTerminated());
+        assertFalse("Thread did not continue after Exception", future.isCancelled());
 
-        thread.terminate();
+        future.cancel(true);
+    }
+    
+    public void testThreadWithExceptionContinueExecutionWithCallable() throws InterruptedException {
         
-        MyCallableIfc<Boolean> callable = new MyCallableIfc<Boolean>() { 
+        CallableTask<Boolean> callable = new CallableTask<Boolean>() { 
             @Override
             public Boolean call() {
                 try {
@@ -71,19 +78,18 @@ public class MyThreadTest {
             }
         };
         
-        thread = new MyThread("TestThread", callable);
-        assertEquals(callable, thread.getCallable().get());
-        thread.start();
+        LongLivedTask<Boolean> task = LongLivedTask.create("TestThread", callable);
+        Future<Boolean> future = task.start();
         Thread.sleep(2000);
-        assertFalse("Thread did not continue after Exception", thread.isTerminated());
+        assertFalse("Thread did not continue after Exception", future.isCancelled());
 
-        thread.terminate();
+        future.cancel(true);
     }
 
     @Test
-    public void testThreadWithExceptionStopExecution() throws InterruptedException {
+    public void testWithExceptionStopExecution() throws InterruptedException, ExecutionException, TimeoutException {
 
-        MyThreadIfc thread = new MyThread("TestThread", new MyRunnableIfc() {
+        LongLivedTask<?> task = LongLivedTask.create("TestThread", new RunnableTask() {
 
             @Override
             public void run() {
@@ -107,38 +113,30 @@ public class MyThreadTest {
             }
         });
 
-        thread.setContinueAfterException(false);
-        thread.setExceptionHandler(new ExceptionHandlerIfc() {
+        task.setContinueAfterException(false);
+        task.setExceptionHandler(e -> e.printStackTrace());
 
-            @Override
-            public void onException(Throwable t) {
-                t.printStackTrace();
+        Future<?> future = task.start();
 
-            }
-        });
+        assertThrows(ExecutionException.class, () -> future.get(1, TimeUnit.SECONDS));
 
-        thread.start();
-
-        thread.join(1000);
-
-        if (!thread.isTerminated()) {
-            Assert.fail("Thread continued after Exception");
-        }
+        assertFalse(future.isCancelled());
+        assertTrue(future.isDone());
     }
     
 
     @Test
-    public void testWithRunnable() throws InterruptedException {
+    public void testWithRunnable() throws InterruptedException, ExecutionException {
         LinkedBlockingQueue<Integer> queue = new LinkedBlockingQueue<>();
         testThread(new TestRunnable(queue), null, queue);
     }
 
     @Test
-    public void testWithCallable() throws InterruptedException {
+    public void testWithCallable() throws InterruptedException, ExecutionException {
         LinkedBlockingQueue<Integer> queue = new LinkedBlockingQueue<>();
-        MyRunnableIfc runnable = new TestRunnable(queue);
+        RunnableTask runnable = new TestRunnable(queue);
 
-        MyCallableIfc<Boolean> callable = new MyCallableIfc<Boolean>() {
+        CallableTask<Boolean> callable = new CallableTask<Boolean>() {
 
             @Override
             public Boolean call() throws Exception {
@@ -159,25 +157,22 @@ public class MyThreadTest {
         testThread(null, callable, queue);
     }
 
-    private void testThread(MyRunnableIfc runnable, MyCallableIfc<?> callable,
-            BlockingQueue<Integer> queue) throws InterruptedException {
+    private void testThread(RunnableTask runnable, CallableTask<?> callable,
+            BlockingQueue<Integer> queue) throws InterruptedException, ExecutionException {
 
-        MyThreadIfc thread;
+        LongLivedTask<?> task;
         if (runnable != null) {
-            thread = new MyThread("TestThread", runnable);
+            task = LongLivedTask.create("TestThread", runnable);
         } else {
-            thread = new MyThread("TestThread", callable);
+            task = LongLivedTask.create("TestThread", callable);
         }
 
-        thread.start();
-        thread.join();
+        task.start().get();
         assertEquals(10, queue.size());
         System.out.println("Thread terminated");
-
-        thread.terminate();
     }
 
-    private static class TestRunnable implements MyRunnableIfc {
+    private static class TestRunnable implements RunnableTask {
         private int count = 0;
 
         final BlockingQueue<Integer> queue;
