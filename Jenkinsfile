@@ -25,7 +25,7 @@ pipeline {
 
     parameters {
         string(defaultValue: '', description: 'Perform a release with the given version', name: 'release')
-        booleanParam(name: 'runSonarqube', defaultValue: true, description: 'Run SonarQube')
+        booleanParam(name: 'runSonarqube', defaultValue: false, description: 'Run SonarQube')
         string(defaultValue: '', description: 'Extra Gradle Options', name: 'extraGradleOpts')
     }
 
