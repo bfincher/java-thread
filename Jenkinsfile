@@ -1,5 +1,5 @@
 def performRelease = false
-def gradleOpts = '--no-daemon --info -s -PlocalNexus=http://nexus:8081/nexus/content//groups/public -PpublishUsername=upload -PpublishPassword=upload -PpublishSnapshotUrl=http://nexus:8081/nexus/content/repositories/snapshots -PpublishReleaseUrl=http://nexus:8081/nexus/content/repositories/releases'
+def gradleOpts = '--no-daemon --info -s -PlocalNexus=https://www.fincherhome.com/nexus/content/groups/public -PpublishUsername=upload -PpublishPassword=upload -PpublishSnapshotUrl=https://www.fincherhome.com/nexus/nexus/content/repositories/snapshots -PpublishReleaseUrl=https://www.fincherhome.com/nexus/nexus/content/repositories/releases'
 
 properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10')), 
 disableConcurrentBuilds(), pipelineTriggers([[$class: 'PeriodicFolderTrigger', interval: '1d']])])
