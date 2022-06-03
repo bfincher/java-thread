@@ -24,7 +24,7 @@ pipeline {
     }
 
     tools {
-        jdk 'jd11'
+        jdk 'jdk11'
     }
 
     stages {
