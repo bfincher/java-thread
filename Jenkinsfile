@@ -23,6 +23,10 @@ pipeline {
         string(defaultValue: '', description: 'Extra Gradle Options', name: 'extraGradleOpts')
     }
 
+    tools {
+        jdk 'jd11'
+    }
+
     stages {
         stage('Prepare') {
             steps {
