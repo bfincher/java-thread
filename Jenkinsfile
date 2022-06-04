@@ -1,5 +1,5 @@
 def performRelease = false
-def gradleOpts = '--no-daemon --info -s -PlocalNexus=http://nexus:8081/nexus/content//groups/public -PpublishUsername=upload -PpublishPassword=upload -PpublishSnapshotUrl=http://nexus:8081/nexus/content/repositories/snapshots -PpublishReleaseUrl=http://nexus:8081/nexus/content/repositories/releases'
+def gradleOpts = "--info -s --build-cache -PlocalNexus=https://www.fincherhome.com/nexus/content/groups/public -PpublishUsername=upload -PpublishPassword=upload -PpublishSnapshotUrl=https://www.fincherhome.com/nexus/content/repositories/snapshots -PpublishReleaseUrl=https://www.fincherhome.com/nexus/content/repositories/releases"
 
 properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10')), 
 disableConcurrentBuilds(), pipelineTriggers([[$class: 'PeriodicFolderTrigger', interval: '1d']])])
@@ -19,8 +19,12 @@ pipeline {
 
     parameters {
         string(defaultValue: '', description: 'Perform a release with the given version', name: 'release')
-        booleanParam(name: 'runSonarqube', defaultValue: true, description: 'Run SonarQube')
+        booleanParam(name: 'runSonarqube', defaultValue: false, description: 'Run SonarQube')
         string(defaultValue: '', description: 'Extra Gradle Options', name: 'extraGradleOpts')
+    }
+
+    tools {
+        jdk 'jdk17'
     }
 
     stages {
