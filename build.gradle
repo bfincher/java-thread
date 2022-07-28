@@ -72,9 +72,11 @@ publishing {
 
     repositories {
         maven {
-	        credentials {
-	            username = "${publishUsername}"
-		    password = "${publishPassword}"
+            if (project.hasProperty("publishUsername") && project.hasProperty("publishPassword")) { 
+              credentials {
+                username = "${publishUsername}"
+                password = "${publishPassword}"
+              }
             }
 		
 	        if (project.version.endsWith('-SNAPSHOT')) {
@@ -82,7 +84,6 @@ publishing {
 	        } else {
 	            url "${publishReleaseUrl}"
 	        }
-            allowInsecureProtocol = true
             authentication {
                 basic(BasicAuthentication)
             }
