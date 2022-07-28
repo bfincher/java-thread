@@ -32,7 +32,7 @@ pipeline {
   stages {
     stage('Prepare') {
       steps { script {
-        if (!params.release.isEmpty()) {
+        if (params.release != null && !params.release.isEmpty()) {
           performRelease = true
         }                           
         if (!params.extraGradleOpts.isEmpty()) {

@@ -12,7 +12,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.fincher:gradle-utilities:0.0.5'
+        classpath 'com.fincher:gradle-utilities:0.1.1'
         classpath 'com.fincher:gradle-release:0.1.1'
     }
 }
@@ -27,8 +27,9 @@ plugins {
     id "org.sonarqube" version "3.3"
 }
 
-apply plugin: com.fincher.gradle.eclipse.EclipseSettings
-apply plugin: com.fincher.gradle.checkstyle.CheckstyleConfigPlugin
+apply plugin: 'com.fincher.java.eclipse'
+apply plugin: 'com.fincher.java.checkstyle'
+apply plugin: 'com.fincher.release'
 
 group = 'com.fincher'
 
@@ -96,7 +97,7 @@ checkstyle {
 }
 
 release {
-    git {
-        requireBranch = ''
-    }
+  if (project.hasProperty('sshKeyFile')) {
+    gitRepositorySshPrivateKeyFile = file("${sshKeyFile}")
+  }
 }
