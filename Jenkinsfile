@@ -1,5 +1,5 @@
 def performRelease = false
-def gradleOpts = "--info -s --build-cache -PlocalNexus=https://nexus.fincherhome.com/nexus/content/groups/public"
+def gradleOpts = "-s --build-cache -PlocalNexus=https://nexus.fincherhome.com/nexus/content/groups/public"
 
 properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10')), 
 disableConcurrentBuilds(), pipelineTriggers([[$class: 'PeriodicFolderTrigger', interval: '1d']])])
@@ -57,7 +57,7 @@ pipeline {
           }
          
           withCredentials([usernamePassword(credentialsId: 'nexus.fincherhome.com', usernameVariable: 'publishUsername', passwordVariable: 'publishPassword')]) {
-            sh './gradlew publish -PpublishUsername=${publishUsername} -PpublishPassword=${publishPassword} ' + gradleOpts
+            sh './gradlew publish -PpublishUsername=${publishUsername} -PpublishPassword=${publishPassword} -PpublishSnapshotUrl=https://nexus.fincherhome.com/nexus/content/repositories/snapshots -PpublishReleaseUrl=https://nexus.fincherhome.com/nexus/content/repositories/releases ' + gradleOpts
           }
         }
       } }
