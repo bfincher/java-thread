@@ -2,7 +2,7 @@ def performRelease = false
 def gradleOpts = "-s --build-cache -PlocalNexus=https://nexus.fincherhome.com/nexus/content/groups/public"
 
 pipeline {
-  agent any
+  agent { label 'docker-jdk17' }
 
   parameters {
     string(defaultValue: '', description: 'Extra Gradle Options', name: 'extraGradleOpts')
