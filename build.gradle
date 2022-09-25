@@ -16,8 +16,6 @@ buildscript {
   }
 }
 
-import com.fincher.gradle.jenkinsfile.CreateJenkinsfileTask
-
 plugins {
   id "java"
   id "maven-publish"
@@ -106,7 +104,4 @@ release {
   if (project.hasProperty('sshKeyFile')) {
     gitRepositorySshPrivateKeyFile = file("${sshKeyFile}")
   }
-}
-
-tasks.register('generateJenkinsfile', CreateJenkinsfileTask) {
 }
