@@ -18,13 +18,13 @@ public class LongLivedTaskTest {
 
     @Test
     public void testThreadWithExceptionContinueExecutionWithRunnable() throws InterruptedException {
-        
+
         RunnableTask runnable = new RunnableTask() {
             @Override
             public void run() {
                 try {
                     System.out.println("Thread running");
-                    Thread.sleep(500);
+                    Thread.sleep(50);
                     throw new Error("Test Exception");
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -40,30 +40,31 @@ public class LongLivedTaskTest {
             @Override
             public void terminate() {
             }
-         
+
         };
-        
+
         LongLivedTask<Void> task = LongLivedTask.create("TestThread", runnable);
         Future<Void> future = task.start();
-        Thread.sleep(2000);
+        Thread.sleep(200);
         assertFalse("Thread did not continue after Exception", future.isCancelled());
 
         future.cancel(true);
     }
-    
+
+    @Test
     public void testThreadWithExceptionContinueExecutionWithCallable() throws InterruptedException {
-        
-        CallableTask<Boolean> callable = new CallableTask<Boolean>() { 
+
+        CallableTask<Boolean> callable = new CallableTask<Boolean>() {
             @Override
             public Boolean call() {
                 try {
                     System.out.println("Thread running");
-                    Thread.sleep(500);
+                    Thread.sleep(50);
                     throw new Error("Test Exception");
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                
+
                 return true;
 
             }
@@ -77,10 +78,10 @@ public class LongLivedTaskTest {
             public void terminate() {
             }
         };
-        
+
         LongLivedTask<Boolean> task = LongLivedTask.create("TestThread", callable);
         Future<Boolean> future = task.start();
-        Thread.sleep(2000);
+        Thread.sleep(200);
         assertFalse("Thread did not continue after Exception", future.isCancelled());
 
         future.cancel(true);
@@ -123,7 +124,6 @@ public class LongLivedTaskTest {
         assertFalse(future.isCancelled());
         assertTrue(future.isDone());
     }
-    
 
     @Test
     public void testWithRunnable() throws InterruptedException, ExecutionException {
@@ -186,7 +186,7 @@ public class LongLivedTaskTest {
             try {
                 System.out.println("Thread running");
                 queue.add(count++);
-                Thread.sleep(500);
+                Thread.sleep(50);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
