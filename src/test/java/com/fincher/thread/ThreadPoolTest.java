@@ -39,7 +39,7 @@ public class ThreadPoolTest {
                 System.out.println(str);
                 queue.add(str);
                 try {
-                    Thread.sleep(500);
+                    Thread.sleep(50);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -219,19 +219,16 @@ public class ThreadPoolTest {
 
     @Test
     public void testFixedDelay() throws InterruptedException, ExecutionException {
-        ThreadPool threadPool = null;
+        ThreadPool threadPool = new ThreadPool(10);
         try {
-            threadPool = new ThreadPool(10);
-
             System.out.println("testFixedDelay");
 
-            System.out.println("Scheduling at " + System.currentTimeMillis());
             LinkedBlockingQueue<String> queue = new LinkedBlockingQueue<String>();
             Future<?> future = threadPool.scheduleWithFixedDelay(
-                    new TestEventRunnableFuture("testPeriodicTimer", queue), Duration.ofMillis(250),
-                    Duration.ofMillis(500));
+                    new TestEventRunnableFuture("testPeriodicTimer", queue), Duration.ofMillis(25),
+                    Duration.ofMillis(50));
 
-            Thread.sleep(1000);
+            Thread.sleep(100);
             future.cancel(false);
 
             try {
@@ -240,7 +237,7 @@ public class ThreadPoolTest {
                 // this is expected
             }
 
-            assertEquals(2, queue.size());
+            Awaitility.await().atMost(Duration.ofSeconds(2)).until(() -> {System.out.println(queue.size()); return queue.size() >= 2;});
         } finally {
             threadPool.shutdown();
         }
@@ -256,9 +253,9 @@ public class ThreadPoolTest {
 
             LinkedBlockingQueue<String> queue = new LinkedBlockingQueue<String>();
 
-            TestEventRunnableFuture trf = new TestEventRunnableFuture("testPeriodicTimer", queue, 1500);
+            TestEventRunnableFuture trf = new TestEventRunnableFuture("testPeriodicTimer", queue, 150);
 
-            Future<?> future = threadPool.scheduleAtFixedRate(trf, Duration.ZERO, Duration.ofSeconds(2));
+            Future<?> future = threadPool.scheduleAtFixedRate(trf, Duration.ZERO, Duration.ofMillis(200));
 
             Awaitility.await().until(() -> queue.size() >= 5);
 
