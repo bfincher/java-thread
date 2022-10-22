@@ -1,21 +1,3 @@
-buildscript {
-  repositories {
-    mavenLocal()
-    if (project.hasProperty('localNexus')) {
-      maven {
-        url "${localNexus}"
-      }
-    } else {
-      mavenCentral()
-    }
-  }
-
-  dependencies {
-    classpath 'com.fincher:gradle-utilities:0.2.0'
-    classpath 'com.fincher:gradle-release:0.1.1'
-  }
-}
-
 plugins {
   id "java"
   id "maven-publish"
@@ -23,11 +5,11 @@ plugins {
   id "eclipse"
   id "com.diffplug.spotless" version "6.11.0"
   id 'checkstyle'
+  id 'base'
+  id 'com.fincher.java.eclipse'
+  id 'com.fincher.java.checkstyle'
+  id 'com.fincher.release'
 }
-
-apply plugin: 'com.fincher.java.eclipse'
-apply plugin: 'com.fincher.java.checkstyle'
-apply plugin: 'com.fincher.release'
 
 group = 'com.fincher'
 
@@ -38,14 +20,9 @@ targetCompatibility = 1.17
 
 repositories {
   mavenLocal()
-    if (project.hasProperty('localNexus')) {
-        maven {
-          url "${localNexus}" 
-          allowInsecureProtocol = true
-        }
-    } else {
-        mavenCentral()
-    }
+  maven {
+    url "${localNexus}" 
+  }
 }
 
 dependencies {
@@ -74,11 +51,9 @@ if (project.hasProperty("publishUsername") &&
 
     repositories {
       maven {
-        if (project.hasProperty("publishUsername") && project.hasProperty("publishPassword")) { 
-          credentials {
-            username = "${publishUsername}"
-            password = "${publishPassword}"
-          }
+        credentials {
+          username = "${publishUsername}"
+          password = "${publishPassword}"
         }
 		
        if (project.version.endsWith('-SNAPSHOT')) {

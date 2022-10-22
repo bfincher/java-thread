@@ -1,1 +1,17 @@
+pluginManagement {
+  repositories {
+    maven {
+      url "${localNexus}"
+    }
+
+    gradlePluginPortal()
+  }
+
+  plugins {
+    id 'com.fincher.java.eclipse' version gradleUtilitiesVersion
+    id 'com.fincher.java.checkstyle' version gradleUtilitiesVersion
+    id 'com.fincher.release' version gradleReleaseVersion
+  }
+}
+
 rootProject.name = 'java-thread'
