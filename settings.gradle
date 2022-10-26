@@ -1,5 +1,7 @@
 pluginManagement {
   repositories {
+    mavenLocal()
+
     maven {
       url "${localNexus}"
     }
@@ -10,6 +12,7 @@ pluginManagement {
   plugins {
     id 'com.fincher.java.eclipse' version gradleUtilitiesVersion
     id 'com.fincher.java.checkstyle' version gradleUtilitiesVersion
+    id 'com.fincher.java' version gradleUtilitiesVersion
     id 'com.fincher.release' version gradleReleaseVersion
   }
 }

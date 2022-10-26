@@ -1,14 +1,7 @@
 plugins {
-  id "java"
-  id "maven-publish"
-  id "jacoco"
-  id "eclipse"
   id "com.diffplug.spotless" version "6.11.0"
-  id 'checkstyle'
-  id 'base'
-  id 'com.fincher.java.eclipse'
-  id 'com.fincher.java.checkstyle'
   id 'com.fincher.release'
+  id 'com.fincher.java'
 }
 
 group = 'com.fincher'
@@ -18,13 +11,6 @@ description = """Thread Utilities"""
 sourceCompatibility = 1.17
 targetCompatibility = 1.17
 
-repositories {
-  mavenLocal()
-  maven {
-    url "${localNexus}" 
-  }
-}
-
 dependencies {
     implementation 'org.apache.logging.log4j:log4j-slf4j-impl:2.19.0'
     implementation 'com.google.guava:guava:31.1-jre'
@@ -33,52 +19,6 @@ dependencies {
     testImplementation 'org.awaitility:awaitility:4.2.0'
 }
 
-test {
-  useJUnitPlatform()
-}
-
-task sourcesJar(type: Jar) {
-    from sourceSets.main.allJava
-    archiveClassifier.set("sources")
-}
-
-if (project.hasProperty("publishUsername") && 
-    project.hasProperty("publishPassword") &&
-    project.hasProperty("publishSnapshotUrl") &&
-    project.hasProperty("publishReleaseUrl")) {
-  publishing {
-    publications {
-      mavenJava(MavenPublication) {
-        from components.java
-	    artifact tasks.sourcesJar
-	  }
-    }
-
-    repositories {
-      maven {
-        credentials {
-          username = "${publishUsername}"
-          password = "${publishPassword}"
-        }
-		
-       if (project.version.endsWith('-SNAPSHOT')) {
-	     url "${publishSnapshotUrl}"
-	    } else {
-	      url "${publishReleaseUrl}"
-	    }
-        authentication {
-          basic(BasicAuthentication)
-        }
-      }
-    }
-  }
-}
-
-tasks.checkstyleMain.dependsOn("copyCheckstyleConfig")
-
-checkstyle {
-    configDirectory = "${buildDir}/generated/checkstyleConfig" as File
-}
 
 release {
   if (project.hasProperty('sshKeyFile')) {
