@@ -1,7 +1,8 @@
 package com.fincher.thread;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -14,8 +15,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledFuture;
 
 import org.awaitility.Awaitility;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 public class ThreadPoolTest {
 
@@ -128,7 +129,7 @@ public class ThreadPoolTest {
         }
     }
 
-    private void runTestWithXThreads(int numThreads) throws InterruptedException {
+    private void runTestWithXThreads(int numThreads) throws InterruptedException, ExecutionException {
         ThreadPool threadPool = new ThreadPool(numThreads);
 
         int numSubmissions = numThreads * 2;
@@ -142,13 +143,8 @@ public class ThreadPoolTest {
             futures.add(threadPool.submit(new TestRunnable(String.valueOf(i), queue)));
         }
 
-        try {
-            for (Future<?> future : futures) {
-                future.get();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            Assert.fail(e.getMessage());
+        for (Future<?> future : futures) {
+            future.get();
         }
 
         for (BlockingQueue<String> queue : queueList) {
@@ -158,18 +154,19 @@ public class ThreadPoolTest {
     }
 
     @Test
-    public void testOneThread() throws InterruptedException {
+    public void testOneThread() throws Exception {
         System.out.println("Testing with one thread");
         runTestWithXThreads(1);
     }
 
     @Test
-    public void testTwoThread() throws InterruptedException {
+    public void testTwoThread() throws Exception {
         System.out.println("Testing with two threads");
         runTestWithXThreads(2);
     }
 
-    @Test(timeout = 5000)
+    @Test
+    @Timeout(value = 5)
     public void testTimer() throws InterruptedException, ExecutionException {
         ThreadPool threadPool = null;
         try {
@@ -237,7 +234,10 @@ public class ThreadPoolTest {
                 // this is expected
             }
 
-            Awaitility.await().atMost(Duration.ofSeconds(2)).until(() -> {System.out.println(queue.size()); return queue.size() >= 2;});
+            Awaitility.await().atMost(Duration.ofSeconds(2)).until(() -> {
+                System.out.println(queue.size());
+                return queue.size() >= 2;
+            });
         } finally {
             threadPool.shutdown();
         }
@@ -273,11 +273,11 @@ public class ThreadPoolTest {
         }
     }
 
-    @Test(expected = UnsupportedOperationException.class)
+    @Test
     public void testSetThreadFactory() {
         ThreadPool threadPool = new ThreadPool(1, (r, e) -> {
         });
 
-        threadPool.setThreadFactory(null);
+        assertThrows(UnsupportedOperationException.class, () -> threadPool.setThreadFactory(null));
     }
 }
