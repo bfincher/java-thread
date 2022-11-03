@@ -3,7 +3,7 @@ def gradleOpts = "-s --build-cache -PlocalNexus=https://nexus.fincherhome.com/ne
 def buildCacheDir = ""
 
 pipeline {
-  agent { label 'docker-jdk17' }
+  agent { label "docker-jdk17" }
 
   parameters {
     string(defaultValue: '', description: 'Extra Gradle Options', name: 'extraGradleOpts')
@@ -15,18 +15,22 @@ pipeline {
     string(name: 'buildCacheName', defaultValue: 'default', description: 'Build cache name')
 
   }
-
+  
+  
   stages {
     stage('Prepare') {
       steps {
         script {
           
+          sh "wget https://nexus.fincherhome.com/nexus/service/local/repositories/releases/content/com/fincher/gradle-cache/0.0.1/gradle-cache-0.0.1.tgz -O /tmp/gradle-cache.tgz"
+          sh "tar -zxf /tmp/gradle-cache.tgz --directory /tmp"
+
           buildCacheDir = sh(
-              script: "src/main/resources/getBuildCache ${params.baseBuildCacheDir} ${params.buildCacheName}",
+              script: "/tmp/getBuildCache ${params.baseBuildCacheDir} ${params.buildCacheName}",
               returnStdout: true)
-
+              
           gradleOpts = gradleOpts + " --gradle-user-home " + buildCacheDir
-
+          
           def releaseOptionCount = 0;
           def prepareReleaseOptions = "";
           
@@ -66,7 +70,7 @@ pipeline {
 		
     stage('Build') {
       steps {
-        sh 'gradle clean build ' + gradleOpts     
+        sh 'gradle clean build ' + gradleOpts
       }
     }
     
@@ -80,7 +84,7 @@ pipeline {
             publishParams += ' -PpublishSnapshotUrl=https://nexus.fincherhome.com/nexus/content/repositories/snapshots'
             publishParams += ' -PpublishReleaseUrl=https://nexus.fincherhome.com/nexus/content/repositories/releases'
             withCredentials([usernamePassword(credentialsId: 'nexus.fincherhome.com', usernameVariable: 'publishUsername', passwordVariable: 'publishPassword')]) {
-              sh "gradle publish  ${publishParams} -s --build-cache -PlocalNexus=https://nexus.fincherhome.com/nexus/content/groups/public"
+              sh "gradle publish  ${publishParams} ${gradleOpts}"
             }
           }
 
@@ -94,10 +98,10 @@ pipeline {
       }
     }
   }
-
+  
   post {
     always {
-      sh("src/main/resources/releaseBuildCache ${buildCacheDir}")
+      sh("/tmp/releaseBuildCache ${buildCacheDir}")
     }
   }
 }

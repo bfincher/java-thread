@@ -1,3 +1,4 @@
+import com.fincher.gradle.jenkinsfile.CreateJenkinsfileTask
 plugins {
   id 'com.fincher.release'
   id 'com.fincher.java'
@@ -23,4 +24,11 @@ release {
   if (project.hasProperty('sshKeyFile')) {
     gitRepositorySshPrivateKeyFile = file("${sshKeyFile}")
   }
+}
+
+tasks.register("createJenkinsfile", CreateJenkinsfileTask)
+
+tasks.named('createJenkinsfile') {
+    agent = '{ label "docker-jdk17" }'
+    buildSteps = ["sh 'gradle clean build ' + gradleOpts"]
 }
