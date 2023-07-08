@@ -1,5 +1,6 @@
 def performRelease = false
-def gradleOpts = "-s --build-cache -PlocalNexus=https://nexus.fincherhome.com/nexus/content/groups/public"
+def localNexusBaseUrl = 'http://nexus.dev:8081'
+def gradleOpts = "-s --build-cache -PlocalNexus=${localNexusBaseUrl}/nexus/content/groups/public"
 def buildCacheDir = ""
 
 pipeline {
@@ -22,7 +23,7 @@ pipeline {
       steps {
         script {
           
-          sh "wget https://nexus.fincherhome.com/nexus/service/local/repositories/releases/content/com/fincher/gradle-cache/0.0.1/gradle-cache-0.0.1.tgz -O /tmp/gradle-cache.tgz"
+          sh "wget ${localNexusBaseUrl}/nexus/service/local/repositories/releases/content/com/fincher/gradle-cache/0.0.1/gradle-cache-0.0.1.tgz -O /tmp/gradle-cache.tgz"
           sh "tar -zxf /tmp/gradle-cache.tgz --directory /tmp"
 
           buildCacheDir = sh(
