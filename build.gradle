@@ -8,8 +8,11 @@ group = 'com.fincher'
 
 description = """Thread Utilities"""
 
-sourceCompatibility = 1.17
-targetCompatibility = 1.17
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
 
 dependencies {
     implementation 'org.apache.logging.log4j:log4j-slf4j-impl:2.20.0'
