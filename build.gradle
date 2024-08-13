@@ -15,7 +15,9 @@ java {
 }
 
 dependencies {
-    implementation 'org.apache.logging.log4j:log4j-slf4j-impl:2.20.0'
+    implementation 'org.slf4j:slf4j-api:2.0.14'
+//    runtimeOnly 'org.apache.logging.log4j:log4j-slf4j18-impl:2.18.0'
+    runtimeOnly 'org.apache.logging.log4j:log4j-slf4j-impl:2.20.0'
     implementation 'com.google.guava:guava:32.1.1-jre'
     testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.9.3'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.3'

@@ -33,23 +33,26 @@ public class ThreadPool extends ScheduledThreadPoolExecutor {
         throw new UnsupportedOperationException("The thread factory cannot be changed");
     }
 
-    public ScheduledFuture<?> schedule(Runnable command, Duration delay) {
-        return schedule(command, delay.toNanos(), TimeUnit.NANOSECONDS);
+    @SuppressWarnings("unchecked")
+    public ScheduledFuture<Void> schedule(Runnable command, Duration delay) {
+        return (ScheduledFuture<Void>) schedule(command, delay.toNanos(), TimeUnit.NANOSECONDS);
     }
 
     public <V> ScheduledFuture<V> schedule(Callable<V> callable, Duration delay) {
         return schedule(callable, delay.toNanos(), TimeUnit.NANOSECONDS);
     }
 
-    public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, Duration initialDelay,
+    @SuppressWarnings("unchecked")
+    public ScheduledFuture<Void> scheduleAtFixedRate(Runnable command, Duration initialDelay,
             Duration period) {
-        return scheduleAtFixedRate(command, initialDelay.toNanos(), period.toNanos(),
+        return (ScheduledFuture<Void>) scheduleAtFixedRate(command, initialDelay.toNanos(), period.toNanos(),
                 TimeUnit.NANOSECONDS);
     }
 
-    public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, Duration initialDelay,
+    @SuppressWarnings("unchecked")
+    public ScheduledFuture<Void> scheduleWithFixedDelay(Runnable command, Duration initialDelay,
             Duration delay) {
-        return scheduleWithFixedDelay(command, initialDelay.toNanos(), delay.toNanos(),
+        return (ScheduledFuture<Void>) scheduleWithFixedDelay(command, initialDelay.toNanos(), delay.toNanos(),
                 TimeUnit.NANOSECONDS);
     }
 

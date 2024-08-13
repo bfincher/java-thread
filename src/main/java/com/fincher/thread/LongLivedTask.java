@@ -64,7 +64,7 @@ public final class LongLivedTask<T> {
 
     private volatile State state = State.INITIAL;
     private Throwable exception = null;
-    private volatile T result = null;
+    private T result = null;
     private final Lock stateLock = new ReentrantLock();
     private final Condition stateChangedCondition = stateLock.newCondition();
     private Thread thread;
@@ -82,7 +82,7 @@ public final class LongLivedTask<T> {
      * @return A new LongLovedTask
      */
     public static LongLivedTask<Void> create(String name, RunnableTask task) {
-        return new LongLivedTask<Void>(name, task);
+        return new LongLivedTask<>(name, task);
     }
 
     /**
@@ -90,7 +90,7 @@ public final class LongLivedTask<T> {
      * 
      * @param name The name of the thread used to execute the task
      * @param task To be invoked upon each thread iteration
-     * @param <T>  The return type of the Callable
+     * @param <T> The return type of the Callable
      * @return A new LongLovedTask
      */
     public static <T> LongLivedTask<T> create(String name, CallableTask<T> task) {
@@ -100,7 +100,7 @@ public final class LongLivedTask<T> {
     /**
      * Constructs a new LongLivedTask
      * 
-     * @param name     The name of the thread used to execute the task
+     * @param name The name of the thread used to execute the task
      * @param runnable To be invoked upon each thread iteration
      */
     private LongLivedTask(String name, RunnableTask runnable) {
@@ -112,7 +112,7 @@ public final class LongLivedTask<T> {
     /**
      * Constructs a new LongLivedTask.
      * 
-     * @param name     The name of the thread used to execute the task
+     * @param name The name of the thread used to execute the task
      * @param callable To be invoked upon each thread iteration
      */
     private LongLivedTask(String name, CallableTask<T> callable) {
@@ -122,7 +122,7 @@ public final class LongLivedTask<T> {
             try {
                 result = callable.call();
             } catch (Exception t) {
-                throw new RuntimeException(t);
+                throw new UncheckedException(t);
             }
         };
     }
@@ -185,7 +185,10 @@ public final class LongLivedTask<T> {
 
     private void handleException(Throwable t) {
         if (exceptionHandler == null) {
-            LOG.error(name + " " + t.getMessage(), t);
+            LOG.atError().setMessage("{} {}")
+                    .addArgument(name)
+                    .addArgument(t::getMessage)
+                    .setCause(t);
         } else {
             exceptionHandler.accept(t);
         }
@@ -239,7 +242,7 @@ public final class LongLivedTask<T> {
                 Duration waitTime = Duration.between(now, waitUntil);
                 while (waitTime.compareTo(Duration.ZERO) > 0
                         && state != State.TERMINATED && state != State.CANCELLED) {
-                    stateChangedCondition.await(waitTime.toNanos(), TimeUnit.NANOSECONDS);
+                    stateChangedCondition.await(waitTime.toNanos(), TimeUnit.NANOSECONDS); // NOSONAR
 
                     now = Instant.now();
                     waitTime = Duration.between(now, waitUntil);
@@ -254,7 +257,7 @@ public final class LongLivedTask<T> {
 
             case TERMINATED:
                 if (exception == null) {
-                    return (T) result;
+                    return result;
                 } else {
                     throw new ExecutionException(exception);
                 }
