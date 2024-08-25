@@ -64,7 +64,7 @@ public final class LongLivedTask<T> {
 
     private volatile State state = State.INITIAL;
     private Throwable exception = null;
-    private volatile T result = null;
+    private T result = null;
     private final Lock stateLock = new ReentrantLock();
     private final Condition stateChangedCondition = stateLock.newCondition();
     private Thread thread;
@@ -82,7 +82,7 @@ public final class LongLivedTask<T> {
      * @return A new LongLovedTask
      */
     public static LongLivedTask<Void> create(String name, RunnableTask task) {
-        return new LongLivedTask<Void>(name, task);
+        return new LongLivedTask<>(name, task);
     }
 
     /**
@@ -90,7 +90,7 @@ public final class LongLivedTask<T> {
      * 
      * @param name The name of the thread used to execute the task
      * @param task To be invoked upon each thread iteration
-     * @param <T>  The return type of the Callable
+     * @param <T> The return type of the Callable
      * @return A new LongLovedTask
      */
     public static <T> LongLivedTask<T> create(String name, CallableTask<T> task) {
@@ -100,7 +100,7 @@ public final class LongLivedTask<T> {
     /**
      * Constructs a new LongLivedTask
      * 
-     * @param name     The name of the thread used to execute the task
+     * @param name The name of the thread used to execute the task
      * @param runnable To be invoked upon each thread iteration
      */
     private LongLivedTask(String name, RunnableTask runnable) {
@@ -112,9 +112,10 @@ public final class LongLivedTask<T> {
     /**
      * Constructs a new LongLivedTask.
      * 
-     * @param name     The name of the thread used to execute the task
+     * @param name The name of the thread used to execute the task
      * @param callable To be invoked upon each thread iteration
      */
+    @SuppressWarnings("squid:S112")
     private LongLivedTask(String name, CallableTask<T> callable) {
         this.name = name;
         controllable = callable;
@@ -185,7 +186,9 @@ public final class LongLivedTask<T> {
 
     private void handleException(Throwable t) {
         if (exceptionHandler == null) {
-            LOG.error(name + " " + t.getMessage(), t);
+            LOG.atError().setMessage("{} {}")
+                    .addArgument(name)
+                    .addArgument(t::getMessage);
         } else {
             exceptionHandler.accept(t);
         }
@@ -231,6 +234,7 @@ public final class LongLivedTask<T> {
         }
 
         @Override
+        @SuppressWarnings("squid:S899")
         public T get(long timeToWait, TimeUnit unit) throws InterruptedException, ExecutionException {
             Instant waitUntil = Instant.now().plus(Duration.ofNanos(unit.toNanos(timeToWait)));
             stateLock.lock();
@@ -254,7 +258,7 @@ public final class LongLivedTask<T> {
 
             case TERMINATED:
                 if (exception == null) {
-                    return (T) result;
+                    return result;
                 } else {
                     throw new ExecutionException(exception);
                 }

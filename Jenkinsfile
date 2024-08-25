@@ -1,10 +1,9 @@
 def performRelease = false
-def localNexusBaseUrl = 'http://nexus.dev:8081'
-def gradleOpts = "-s --build-cache -PlocalNexus=http://nexus.dev:8081/nexus/content/groups/public"
+def gradleOpts = "-s --build-cache -PlocalNexus=http://nexus3:8081/repository/public"
 def buildCacheDir = ""
 
 pipeline {
-  agent { label "docker-jdk17" }
+  agent { label "gradle-8.10-jdk11" }
 
   parameters {
     string(defaultValue: '', description: 'Extra Gradle Options', name: 'extraGradleOpts')
@@ -28,9 +27,9 @@ pipeline {
 
           buildCacheDir = sh(
               script: "/tmp/getBuildCache ${params.baseBuildCacheDir} ${params.buildCacheName}",
-              returnStdout: true)
+              returnStdout: true).trim()
               
-          gradleOpts = gradleOpts + " --gradle-user-home " + buildCacheDir.trim()
+          gradleOpts = gradleOpts + " --gradle-user-home " + buildCacheDir
           
           def releaseOptionCount = 0;
           def prepareReleaseOptions = "";
@@ -82,8 +81,8 @@ pipeline {
           
           if (performRelease || params.publish ) {
             def publishParams = '-PpublishUsername=${publishUsername} -PpublishPassword=${publishPassword}'
-            publishParams += ' -PpublishSnapshotUrl=http://nexus.dev:8081/nexus/content/repositories/snapshots'
-            publishParams += ' -PpublishReleaseUrl=http://nexus.dev:8081/nexus/content/repositories/releases'
+            publishParams += ' -PpublishSnapshotUrl=http://nexus3:8081/repository/snapshots'
+            publishParams += ' -PpublishReleaseUrl=http://nexus3:8081/repository/releases'
             withCredentials([usernamePassword(credentialsId: 'nexus.fincherhome.com', usernameVariable: 'publishUsername', passwordVariable: 'publishPassword')]) {
               sh "gradle publish  ${publishParams} ${gradleOpts}"
             }
