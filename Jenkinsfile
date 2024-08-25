@@ -22,7 +22,7 @@ pipeline {
       steps {
         script {
           
-          sh "wget http://nexus.dev:8081/nexus/service/local/repositories/releases/content/com/fincher/gradle-cache/0.0.1/gradle-cache-0.0.1.tgz -O /tmp/gradle-cache.tgz"
+          sh "wget http://nexus3:8081/repository/public/com/fincher/gradle-cache/0.0.1/gradle-cache-0.0.1.tgz -O /tmp/gradle-cache.tgz"
           sh "tar -zxf /tmp/gradle-cache.tgz --directory /tmp"
 
           buildCacheDir = sh(
