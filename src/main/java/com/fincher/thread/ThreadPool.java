@@ -33,6 +33,7 @@ public class ThreadPool extends ScheduledThreadPoolExecutor {
         throw new UnsupportedOperationException("The thread factory cannot be changed");
     }
 
+    @SuppressWarnings("squid:S1452")
     public ScheduledFuture<?> schedule(Runnable command, Duration delay) {
         return schedule(command, delay.toNanos(), TimeUnit.NANOSECONDS);
     }
@@ -41,12 +42,14 @@ public class ThreadPool extends ScheduledThreadPoolExecutor {
         return schedule(callable, delay.toNanos(), TimeUnit.NANOSECONDS);
     }
 
+    @SuppressWarnings("squid:S1452")
     public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, Duration initialDelay,
             Duration period) {
         return scheduleAtFixedRate(command, initialDelay.toNanos(), period.toNanos(),
                 TimeUnit.NANOSECONDS);
     }
 
+    @SuppressWarnings("squid:S1452")
     public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, Duration initialDelay,
             Duration delay) {
         return scheduleWithFixedDelay(command, initialDelay.toNanos(), delay.toNanos(),
