@@ -17,3 +17,20 @@ pluginManagement {
 }
 
 rootProject.name = 'java-thread'
+
+dependencyResolutionManagement {	
+	repositories {
+    	mavenLocal()
+
+    	maven {
+      		url "${localNexus}"
+      		allowInsecureProtocol = true
+      	}
+    }
+    	
+    versionCatalogs {
+        libs {
+            from("com.fincher:version-catalog:${versionCatalogVersion}")
+        }
+    }
+}
