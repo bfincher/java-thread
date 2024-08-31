@@ -15,13 +15,12 @@ java {
 }
 
 dependencies {
-    implementation 'org.slf4j:slf4j-api:2.0.16'
-    implementation 'org.apache.logging.log4j:log4j-slf4j-impl:2.23.1'
-    implementation 'com.google.guava:guava:32.1.3-jre'
-    runtimeOnly 'org.slf4j:log4j-over-slf4j:2.0.16'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.3'
-    testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.10.3'
-    testImplementation 'org.awaitility:awaitility:4.2.2'
+	implementation libs.slf4j.api
+    implementation libs.guava
+    runtimeOnly libs.log4j.over.slf4j
+    testImplementation libs.junit5.api
+    testRuntimeOnly libs.junit5.engine
+    testImplementation libs.awaitility
 }
 
 
