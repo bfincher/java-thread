@@ -225,7 +225,7 @@ public class ThreadPoolTest {
                     new TestEventRunnableFuture("testPeriodicTimer", queue), Duration.ofMillis(25),
                     Duration.ofMillis(50));
 
-            Thread.sleep(100);
+            Thread.sleep(125);
             future.cancel(false);
 
             try {
