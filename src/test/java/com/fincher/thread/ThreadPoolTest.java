@@ -188,7 +188,9 @@ public class ThreadPoolTest {
             long delta = endTime - startTime;
             System.out.println("Finished after " + delta + " millis");
         } finally {
-            threadPool.shutdown();
+            if (threadPool != null) {
+                threadPool.shutdown();
+            }
         }
     }
 
@@ -210,7 +212,9 @@ public class ThreadPoolTest {
 
             assertTrue(queue.isEmpty());
         } finally {
-            threadPool.shutdown();
+            if (threadPool != null) {
+                threadPool.shutdown();
+            }
         }
     }
 
@@ -269,7 +273,9 @@ public class ThreadPoolTest {
 
             assertEquals(5, queue.size());
         } finally {
-            threadPool.shutdown();
+            if (threadPool != null) {
+                threadPool.shutdown();
+            }
         }
     }
 
